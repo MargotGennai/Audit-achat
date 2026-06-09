@@ -170,13 +170,13 @@
     <div style="margin-top:13px"><label style="display:block;font-size:11px;font-weight:600;color:var(--ink-soft);margin-bottom:6px">Société(s) concernée(s)<span class="req"> *</span></label><div class="id-radios" id="id-soc-radios"></div></div>
   </div>
   <div class="note amber"><b>Modèles Excel :</b> téléchargez le modèle, remplissez-le dans Excel, puis déposez-le (avec vos autres pièces : contrats, factures…) dans l'espace de collecte SharePoint. <b>Important : déposez vos fichiers dans le sous-dossier portant le nom de votre société.</b> Votre saisie texte est enregistrée automatiquement dans ce navigateur — vous pouvez fermer et reprendre plus tard sur le même ordinateur.
-    <div style="margin-top:11px"><a href="https://centraleaps.sharepoint.com/:f:/r/sites/Suividesavancesachats/Documents%20partages/Audit%20IT%20%E2%80%94%20pi%C3%A8ces%20jointes?csf=1&web=1&e=260ACX" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:var(--blueprint);color:#fff;font-weight:700;font-size:13px;text-decoration:none;padding:10px 16px;border-radius:8px">&#128193; Ouvrir l'espace de collecte SharePoint</a></div>
+    <div class="sp-slot-big" style="margin-top:11px"></div>
   </div>
   <div id="grid"></div>
   <div class="final-cta">
     <div style="background:var(--accent-wash);border:1px solid #C5DBEF;border-radius:10px;padding:14px 18px;max-width:580px;margin:0 auto 18px;font-size:13px;color:#2C4A63">
       <b style="color:var(--blueprint)">Avant de valider :</b> avez-vous bien déposé tous vos fichiers (modèles Excel complétés, contrats, factures…) dans le sous-dossier de votre société, sur l'espace de collecte ?
-      <div style="margin-top:10px"><a href="https://centraleaps.sharepoint.com/:f:/r/sites/Suividesavancesachats/Documents%20partages/Audit%20IT%20%E2%80%94%20pi%C3%A8ces%20jointes?csf=1&web=1&e=260ACX" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:var(--blueprint);color:#fff;font-weight:700;font-size:13px;text-decoration:none;padding:10px 16px;border-radius:8px">&#128193; Déposer mes fichiers sur SharePoint</a></div>
+      <div class="sp-slot-big" style="margin-top:10px"></div>
     </div>
     <button class="big-validate" onclick="validateAudit()">✓ Valider &amp; exporter</button><p class="cta-sub">Ne se génère que lorsque tout est complet.</p>
   </div>
@@ -184,6 +184,43 @@
 <footer>Astuce : envoyez ce lien à chaque entité. La saisie en cours est conservée automatiquement dans le navigateur.</footer>
 
 <script>
+var SP_ROOT = "https://centraleaps.sharepoint.com/:f:/r/sites/Suividesavancesachats/Documents%20partages/Audit%20IT%20%E2%80%94%20pi%C3%A8ces%20jointes?csf=1&web=1&e=260ACX";
+var SP_FOLDERS = {
+  "APS":"https://centraleaps.sharepoint.com/:f:/r/sites/Suividesavancesachats/Documents%20partages/Audit%20IT%20%E2%80%94%20pi%C3%A8ces%20jointes/APS?csf=1&web=1&e=eTcjnh",
+  "ADP":"https://centraleaps.sharepoint.com/:f:/r/sites/Suividesavancesachats/Documents%20partages/Audit%20IT%20%E2%80%94%20pi%C3%A8ces%20jointes/ADP?csf=1&web=1&e=SSooEl",
+  "BEDP":"https://centraleaps.sharepoint.com/:f:/r/sites/Suividesavancesachats/Documents%20partages/Audit%20IT%20%E2%80%94%20pi%C3%A8ces%20jointes/BEDP?csf=1&web=1&e=ULP10n",
+  "Energy Menuiserie":"https://centraleaps.sharepoint.com/:f:/r/sites/Suividesavancesachats/Documents%20partages/Audit%20IT%20%E2%80%94%20pi%C3%A8ces%20jointes/ENERGY%20MENUISERIES?csf=1&web=1&e=uV4ytt",
+  "Entsia":"https://centraleaps.sharepoint.com/:f:/r/sites/Suividesavancesachats/Documents%20partages/Audit%20IT%20%E2%80%94%20pi%C3%A8ces%20jointes/ENTSIA?csf=1&web=1&e=vHJbws",
+  "Europose":"https://centraleaps.sharepoint.com/:f:/r/sites/Suividesavancesachats/Documents%20partages/Audit%20IT%20%E2%80%94%20pi%C3%A8ces%20jointes/EUROPOSE?csf=1&web=1&e=4HxWm7",
+  "Feralu":"https://centraleaps.sharepoint.com/:f:/r/sites/Suividesavancesachats/Documents%20partages/Audit%20IT%20%E2%80%94%20pi%C3%A8ces%20jointes/FERALU?csf=1&web=1&e=6qXVmy",
+  "Gayrel":"https://centraleaps.sharepoint.com/:f:/r/sites/Suividesavancesachats/Documents%20partages/Audit%20IT%20%E2%80%94%20pi%C3%A8ces%20jointes/GAYREL?csf=1&web=1&e=uYFyi0",
+  "Laumond":"https://centraleaps.sharepoint.com/:f:/r/sites/Suividesavancesachats/Documents%20partages/Audit%20IT%20%E2%80%94%20pi%C3%A8ces%20jointes/LAUMOND?csf=1&web=1&e=yS2Dbk",
+  "Open Alu":"https://centraleaps.sharepoint.com/:f:/r/sites/Suividesavancesachats/Documents%20partages/Audit%20IT%20%E2%80%94%20pi%C3%A8ces%20jointes/OPEN%20ALU?csf=1&web=1&e=nIlUlP",
+  "Pontacq Larregain":"https://centraleaps.sharepoint.com/:f:/r/sites/Suividesavancesachats/Documents%20partages/Audit%20IT%20%E2%80%94%20pi%C3%A8ces%20jointes/PONTACQ?csf=1&web=1&e=wbQ1du"
+};
+function spLink(){
+  var soc=(state._id&&state._id.soc)||[];
+  for(var i=0;i<soc.length;i++){if(SP_FOLDERS[soc[i]])return SP_FOLDERS[soc[i]];}
+  return SP_ROOT;
+}
+function spButtonsHTML(big){
+  var soc=(state._id&&state._id.soc)||[];
+  var known=soc.filter(function(s){return SP_FOLDERS[s];});
+  var style=big
+    ? "display:inline-flex;align-items:center;gap:8px;background:var(--blueprint);color:#fff;font-weight:700;font-size:13px;text-decoration:none;padding:10px 16px;border-radius:8px;margin:4px 6px 0 0"
+    : "display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--blueprint);color:var(--blueprint);font-weight:600;font-size:12.5px;text-decoration:none;padding:7px 12px;border-radius:7px;margin:4px 6px 0 0";
+  if(known.length===0){
+    return '<a class="sp-btns" href="'+SP_ROOT+'" target="_blank" rel="noopener" style="'+style+'">&#128193; '+(big?"Ouvrir l\'espace de collecte SharePoint":"Ouvrir l\'espace de collecte")+'</a>';
+  }
+  return '<span class="sp-btns" style="display:inline-flex;flex-wrap:wrap;gap:0">'+known.map(function(s){
+    return '<a href="'+SP_FOLDERS[s]+'" target="_blank" rel="noopener" style="'+style+'">&#128193; Dossier '+s+'</a>';
+  }).join("")+'</span>';
+}
+function refreshSpLinks(){
+  document.querySelectorAll(".sp-slot-big").forEach(function(el){el.innerHTML=spButtonsHTML(true);});
+  document.querySelectorAll(".sp-slot").forEach(function(el){el.innerHTML=spButtonsHTML(false);});
+}
+
 var XLSX_TEMPLATES = {
   existant: {n:"1-3-existant.xlsx"},
   telephonie: {n:"2-2-telephonie.xlsx"},
@@ -308,7 +345,7 @@ function bindIdent(){
     var on=sel.indexOf(s)>=0;
     var l=document.createElement("label");l.className="opt"+(on?" on":"");
     l.innerHTML='<input type="checkbox" '+(on?"checked":"")+'> '+s;
-    l.querySelector("input").onchange=function(e){var i=sel.indexOf(s);if(e.target.checked&&i<0)sel.push(s);if(!e.target.checked&&i>=0)sel.splice(i,1);l.classList.toggle("on",e.target.checked);box.classList.remove("miss");save();};
+    l.querySelector("input").onchange=function(e){var i=sel.indexOf(s);if(e.target.checked&&i<0)sel.push(s);if(!e.target.checked&&i>=0)sel.splice(i,1);l.classList.toggle("on",e.target.checked);box.classList.remove("miss");save();refreshSpLinks();};
     box.appendChild(l);
   });
 }
@@ -326,6 +363,7 @@ function render(){
     g.appendChild(sec);
   });
   FAMILIES.forEach(function(f){f.items.forEach(bindI);});
+  refreshSpLinks();
   recompute();
 }
 
@@ -444,7 +482,7 @@ function bFile(it){
   var depose=!!S(it.id).fields._depose;
   box.innerHTML='<div class="dz-main">Document à déposer sur SharePoint</div>'+
     '<div class="dz-sub" style="margin-bottom:10px">Déposez ce document (PDF / Excel) dans le sous-dossier de votre société, puis cochez la case ci-dessous.</div>'+
-    '<a href="https://centraleaps.sharepoint.com/:f:/r/sites/Suividesavancesachats/Documents%20partages/Audit%20IT%20%E2%80%94%20pi%C3%A8ces%20jointes?csf=1&web=1&e=260ACX" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--blueprint);color:var(--blueprint);font-weight:600;font-size:12.5px;text-decoration:none;padding:7px 12px;border-radius:7px">&#128193; Ouvrir l\'espace de collecte</a>'+
+    '<div class="sp-slot"></div>'+
     '<label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;justify-content:center"><input type="checkbox" '+(depose?"checked":"")+' style="width:17px;height:17px;accent-color:var(--ok)"> J\'ai déposé ce document sur SharePoint</label>';
   var cb=box.querySelector("input[type=checkbox]");
   cb.onchange=function(){S(it.id).fields._depose=cb.checked;box.classList.remove("miss");save();recompute();};
@@ -533,7 +571,7 @@ function resetAll(){if(confirm("Réinitialiser toute la saisie ? Action irréver
 function toggleFam(h){h.parentElement.classList.toggle("collapsed");}
 function expandAll(o){document.querySelectorAll(".family").forEach(function(f){f.classList.toggle("collapsed",!o);});}
 
-load();bindIdent();render();
+load();bindIdent();render();refreshSpLinks();
 </script>
 </body>
 </html>
