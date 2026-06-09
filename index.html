@@ -169,9 +169,17 @@
     <div class="fields"><div class="field"><label>Nom et prénom<span class="req"> *</span></label><input id="id-nom" type="text" placeholder="Ex. Dupont Marie"></div></div>
     <div style="margin-top:13px"><label style="display:block;font-size:11px;font-weight:600;color:var(--ink-soft);margin-bottom:6px">Société(s) concernée(s)<span class="req"> *</span></label><div class="id-radios" id="id-soc-radios"></div></div>
   </div>
-  <div class="note amber"><b>Modèles Excel :</b> téléchargez le modèle, remplissez-le dans Excel, puis redéposez-le. Votre saisie est enregistrée automatiquement dans ce navigateur — vous pouvez fermer et reprendre plus tard sur le même ordinateur.</div>
+  <div class="note amber"><b>Modèles Excel :</b> téléchargez le modèle, remplissez-le dans Excel, puis déposez-le (avec vos autres pièces : contrats, factures…) dans l'espace de collecte SharePoint. <b>Important : déposez vos fichiers dans le sous-dossier portant le nom de votre société.</b> Votre saisie texte est enregistrée automatiquement dans ce navigateur — vous pouvez fermer et reprendre plus tard sur le même ordinateur.
+    <div style="margin-top:11px"><a href="https://centraleaps.sharepoint.com/:f:/r/sites/Suividesavancesachats/Documents%20partages/Audit%20IT%20%E2%80%94%20pi%C3%A8ces%20jointes?csf=1&web=1&e=260ACX" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:var(--blueprint);color:#fff;font-weight:700;font-size:13px;text-decoration:none;padding:10px 16px;border-radius:8px">&#128193; Ouvrir l'espace de collecte SharePoint</a></div>
+  </div>
   <div id="grid"></div>
-  <div class="final-cta"><button class="big-validate" onclick="validateAudit()">✓ Valider &amp; exporter</button><p class="cta-sub">Ne se génère que lorsque tout est complet.</p></div>
+  <div class="final-cta">
+    <div style="background:var(--accent-wash);border:1px solid #C5DBEF;border-radius:10px;padding:14px 18px;max-width:580px;margin:0 auto 18px;font-size:13px;color:#2C4A63">
+      <b style="color:var(--blueprint)">Avant de valider :</b> avez-vous bien déposé tous vos fichiers (modèles Excel complétés, contrats, factures…) dans le sous-dossier de votre société, sur l'espace de collecte ?
+      <div style="margin-top:10px"><a href="https://centraleaps.sharepoint.com/:f:/r/sites/Suividesavancesachats/Documents%20partages/Audit%20IT%20%E2%80%94%20pi%C3%A8ces%20jointes?csf=1&web=1&e=260ACX" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:var(--blueprint);color:#fff;font-weight:700;font-size:13px;text-decoration:none;padding:10px 16px;border-radius:8px">&#128193; Déposer mes fichiers sur SharePoint</a></div>
+    </div>
+    <button class="big-validate" onclick="validateAudit()">✓ Valider &amp; exporter</button><p class="cta-sub">Ne se génère que lorsque tout est complet.</p>
+  </div>
 </div>
 <footer>Astuce : envoyez ce lien à chaque entité. La saisie en cours est conservée automatiquement dans le navigateur.</footer>
 
@@ -432,21 +440,17 @@ function bFile(it){
     var b=document.createElement("button");b.type="button";b.className="dl-tmpl";b.textContent="\u2913 Télécharger le modèle Excel à remplir";
     b.onclick=function(){dlTemplate(it.template);};c.appendChild(b);
   }
-  var dz=document.createElement("div");dz.className="dropzone";dz.id="dz-"+it.id;
-  dz.innerHTML='<div class="dz-main">'+(it.template?"Redéposez ici le modèle complété":"Déposer un fichier ou cliquer pour choisir")+'</div><div class="dz-sub">PDF, Excel ou CSV · plusieurs fichiers possibles</div><input type="file" multiple accept=".pdf,.xls,.xlsx,.csv" style="display:none">';
-  var inp=dz.querySelector("input");
-  dz.onclick=function(){inp.click();};
-  inp.onchange=function(){addF(it.id,inp.files);inp.value="";};
-  ["dragover","dragenter"].forEach(function(e){dz.addEventListener(e,function(ev){ev.preventDefault();dz.classList.add("drag");});});
-  ["dragleave","drop"].forEach(function(e){dz.addEventListener(e,function(ev){ev.preventDefault();dz.classList.remove("drag");});});
-  dz.addEventListener("drop",function(ev){addF(it.id,ev.dataTransfer.files);});
-  c.appendChild(dz);
-  var ch=document.createElement("div");ch.className="chips";ch.id="chips-"+it.id;c.appendChild(ch);
-  setTimeout(function(){renderCh(it.id);},0);
+  var box=document.createElement("div");box.className="dropzone";box.id="dz-"+it.id;
+  var depose=!!S(it.id).fields._depose;
+  box.innerHTML='<div class="dz-main">Document à déposer sur SharePoint</div>'+
+    '<div class="dz-sub" style="margin-bottom:10px">Déposez ce document (PDF / Excel) dans le sous-dossier de votre société, puis cochez la case ci-dessous.</div>'+
+    '<a href="https://centraleaps.sharepoint.com/:f:/r/sites/Suividesavancesachats/Documents%20partages/Audit%20IT%20%E2%80%94%20pi%C3%A8ces%20jointes?csf=1&web=1&e=260ACX" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--blueprint);color:var(--blueprint);font-weight:600;font-size:12.5px;text-decoration:none;padding:7px 12px;border-radius:7px">&#128193; Ouvrir l\'espace de collecte</a>'+
+    '<label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;justify-content:center"><input type="checkbox" '+(depose?"checked":"")+' style="width:17px;height:17px;accent-color:var(--ok)"> J\'ai déposé ce document sur SharePoint</label>';
+  var cb=box.querySelector("input[type=checkbox]");
+  cb.onchange=function(){S(it.id).fields._depose=cb.checked;box.classList.remove("miss");save();recompute();};
+  c.appendChild(box);
   return c;
 }
-function addF(id,fl){files[id]=files[id]||[];Array.from(fl).forEach(function(f){files[id].push(f);});var dz=document.getElementById("dz-"+id);if(dz)dz.classList.remove("miss");renderCh(id);recompute();}
-function renderCh(id){var box=document.getElementById("chips-"+id);if(!box)return;box.innerHTML="";(files[id]||[]).forEach(function(f,i){var c=document.createElement("div");c.className="chip";c.innerHTML=f.name+' <span>'+(f.size/1024).toFixed(0)+' Ko</span> <button title="Retirer">\u00d7</button>';c.querySelector("button").onclick=function(){files[id].splice(i,1);renderCh(id);recompute();};box.appendChild(c);});}
 function wCnt(s){return(s||"").trim().split(/\s+/).filter(Boolean).length;}
 
 function fFilled(it,f){
@@ -461,7 +465,7 @@ function iStat(it){
   if(s.status==="na")return wCnt(s.comment)>=MINW?"done":"todo";
   var ok=true;
   if(it.fields&&it.fields.length)ok=it.fields.every(function(f){return f.optional||fFilled(it,f);});
-  if(ok&&(it.needFile||it.template))ok=!!(files[it.id]&&files[it.id].length);
+  if(ok&&(it.needFile||it.template))ok=!!S(it.id).fields._depose;
   return ok?"done":"todo";
 }
 function recompute(){
@@ -482,7 +486,7 @@ function markMissing(){
     if(!S(it.id).status){document.querySelector('select.status[data-id="'+CSS.escape(it.id)+'"]').classList.add("needfill");p.push(it.id+" — statut manquant");return;}
     if(S(it.id).status==="na"){var ta=document.querySelector("#answer-"+CSS.escape(it.id)+" textarea");if(ta)ta.classList.add("miss");p.push(it.id+" — justification");return;}
     if(it.fields&&it.fields.some(function(f){return!f.optional&&!fFilled(it,f);}))p.push(it.id+" — champs obligatoires");
-    if((it.needFile||it.template)&&!(files[it.id]&&files[it.id].length)){var dz=document.getElementById("dz-"+it.id);if(dz)dz.classList.add("miss");p.push(it.id+" — fichier manquant");}
+    if((it.needFile||it.template)&&!S(it.id).fields._depose){var dz=document.getElementById("dz-"+it.id);if(dz)dz.classList.add("miss");p.push(it.id+" — dépôt SharePoint à confirmer");}
   });});
   return p;
 }
@@ -509,7 +513,7 @@ function buildReport(){
   var dt=new Date().toLocaleDateString("fr-FR",{day:"2-digit",month:"long",year:"numeric"});
   var tr=0,na=0,inc=0;FAMILIES.forEach(function(f){f.items.forEach(function(it){var st=S(it.id).status;if(st==="transmis")tr++;else if(st==="na")na++;else inc++;});});
   function pill(v){var m={transmis:["Transmis","#1E7A4D","#E6F4EC"],na:["Non concerné","#566273","#EEF1F4"]};var x=m[v]||["Non renseigné","#B23A3A","#FBE9E9"];return'<span style="font-size:11px;font-weight:700;padding:4px 11px;border-radius:99px;color:'+x[1]+';background:'+x[2]+'">'+x[0]+'</span>';}
-  function iAns(it){var s=S(it.id);if(s.status==="na")return'<div style="margin-left:42px;color:#5a6b7b;font-size:13px"><b>Justification :</b> '+esc(s.comment)+'</div>';if(s.status!=="transmis")return'<div style="margin-left:42px;color:#9aa6b2;font-size:13px;font-style:italic">Non renseigné</div>';var pts=[];if(it.fields)it.fields.forEach(function(f){var v=fToText(it,f);if(v)pts.push("<b>"+esc(f.label)+" :</b> "+esc(v));});if(it.needFile||it.template){var fn=(files[it.id]||[]).map(function(f){return f.name;});pts.push("<b>PJ :</b> "+(fn.length?esc(fn.join(", ")):"aucun"));}return'<div style="margin-left:42px;font-size:13px">'+pts.join("<br>")+'</div>';}
+  function iAns(it){var s=S(it.id);if(s.status==="na")return'<div style="margin-left:42px;color:#5a6b7b;font-size:13px"><b>Justification :</b> '+esc(s.comment)+'</div>';if(s.status!=="transmis")return'<div style="margin-left:42px;color:#9aa6b2;font-size:13px;font-style:italic">Non renseigné</div>';var pts=[];if(it.fields)it.fields.forEach(function(f){if(f.key==="_depose")return;var v=fToText(it,f);if(v)pts.push("<b>"+esc(f.label)+" :</b> "+esc(v));});if(it.needFile||it.template){pts.push("<b>Pièces jointes :</b> "+(S(it.id).fields._depose?"déposées sur SharePoint":"non déposées"));}return'<div style="margin-left:42px;font-size:13px">'+pts.join("<br>")+'</div>';}
   var body=FAMILIES.map(function(fam){return'<div style="max-width:920px;margin:18px auto;background:#fff;border:1px solid #e2e7ec;border-radius:12px;overflow:hidden"><h2 style="font-size:17px;padding:16px 22px;background:#f7f9fb;border-bottom:1px solid #e2e7ec;display:flex;align-items:center;gap:12px;margin:0"><span style="background:#15436b;color:#fff;width:28px;height:28px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:14px">'+fam.n+'</span>'+esc(fam.title)+'</h2>'+fam.items.map(function(it){return'<div style="padding:15px 22px;border-top:1px solid #eef1f4"><div style="display:flex;align-items:center;gap:12px;margin-bottom:8px"><span style="font-family:monospace;font-size:12px;font-weight:700;color:#1E6FB8;min-width:30px">'+it.id+'</span><span style="font-weight:600;font-size:14px;flex:1">'+esc(it.t)+'</span>'+pill(S(it.id).status)+'</div>'+iAns(it)+'</div>';}).join("")+'</div>';}).join("");
   return'<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Synthèse audit IT</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;color:#1b2733;line-height:1.5;background:#f4f6f8;padding:0 0 60px}@media print{body{background:#fff}}</style></head><body><header style="background:#15436b;color:#fff;padding:34px 40px"><div style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#9cc2e2;margin-bottom:8px">Synthèse audit IT · Cantal Invest</div><h1 style="font-size:26px;font-weight:700;margin:0">Catégorie IT</h1><div style="margin-top:10px;font-size:14px;color:#d3e3f0">Répondant : <b style="color:#fff">'+esc(state._id.nom)+'</b> · Société(s) : <b style="color:#fff">'+esc(soc)+'</b> · '+dt+'</div></header><div style="max-width:920px;margin:22px auto;padding:0 40px;display:flex;gap:14px;flex-wrap:wrap"><div style="flex:1;min-width:150px;background:#fff;border:1px solid #e2e7ec;border-radius:10px;padding:14px 16px"><div style="font-size:26px;font-weight:700;color:#1E7A4D">'+tr+'</div><div style="font-size:12px;color:#5a6b7b">Transmis</div></div><div style="flex:1;min-width:150px;background:#fff;border:1px solid #e2e7ec;border-radius:10px;padding:14px 16px"><div style="font-size:26px;font-weight:700;color:#566273">'+na+'</div><div style="font-size:12px;color:#5a6b7b">Non concerné</div></div><div style="flex:1;min-width:150px;background:#fff;border:1px solid #e2e7ec;border-radius:10px;padding:14px 16px"><div style="font-size:26px;font-weight:700;color:#B23A3A">'+inc+'</div><div style="font-size:12px;color:#5a6b7b">Non renseigné</div></div></div>'+body+'</body></html>';
 }
@@ -519,7 +523,7 @@ function previewReport(){var w=window.open("","_blank");if(!w){alert("Autorisez 
 function exportCSV(){
   var rows=[["N","Question","Statut","Réponses","Fichiers","Justification"]];
   FAMILIES.forEach(function(fam){rows.push([fam.n,fam.title,"","","",""]);fam.items.forEach(function(it){var s=S(it.id);var stl=(STATUSES.find(function(x){return x.v===s.status;})||{}).label||"";var rep="",fic="",jus="";
-    if(s.status==="transmis"){if(it.fields)rep=it.fields.map(function(f){var v=fToText(it,f);return v?f.label+": "+v:"";}).filter(Boolean).join(" | ");if(it.needFile||it.template)fic=(files[it.id]||[]).map(function(f){return f.name;}).join(", ");}else if(s.status==="na")jus=s.comment||"";
+    if(s.status==="transmis"){if(it.fields)rep=it.fields.map(function(f){if(f.key==="_depose")return"";var v=fToText(it,f);return v?f.label+": "+v:"";}).filter(Boolean).join(" | ");if(it.needFile||it.template)fic=S(it.id).fields._depose?"Déposé sur SharePoint":"Non déposé";}else if(s.status==="na")jus=s.comment||"";
     rows.push([it.id,it.t,stl,rep,fic,jus]);});});
   var csv=rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"';}).join(";");}).join("\r\n");
   dlText("\uFEFF"+csv,"recapitulatif-audit-IT.csv","text/csv");
