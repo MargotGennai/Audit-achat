@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Formulaire d'audit achat — Catégorie IT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root{
     --paper:#F6F7F9;--card:#FFFFFF;--ink:#16222E;--ink-soft:#5A6B7B;
@@ -157,11 +158,8 @@
     <button class="act" onclick="expandAll(false)">Tout replier</button>
     <button class="act" onclick="previewReport()">Aperçu synthèse</button>
     <button class="act" onclick="exportCSV()">Récap CSV</button>
-    <button class="act" onclick="saveJSON()">Sauvegarder .json</button>
-    <button class="act" onclick="document.getElementById('imp').click()">Importer .json</button>
     <button class="act primary" onclick="validateAudit()">Valider &amp; exporter</button>
     <button class="act ghost" onclick="resetAll()">Réinitialiser</button>
-    <input type="file" id="imp" accept=".json" style="display:none" onchange="importJSON(event)">
   </div>
 </div>
 <div class="wrap">
@@ -172,19 +170,19 @@
     <div class="fields"><div class="field"><label>Nom et prénom<span class="req"> *</span></label><input id="id-nom" type="text" placeholder="Ex. Dupont Marie"></div></div>
     <div style="margin-top:13px"><label style="display:block;font-size:11px;font-weight:600;color:var(--ink-soft);margin-bottom:6px">Société(s) concernée(s)<span class="req"> *</span></label><div class="id-radios" id="id-soc-radios"></div></div>
   </div>
-  <div class="note amber"><b>Modèles CSV :</b> téléchargez le modèle, remplissez-le dans Excel (séparateur ;), puis redéposez-le. Les pièces jointes ne sont gardées que le temps de la session.</div>
+  <div class="note amber"><b>Modèles Excel :</b> téléchargez le modèle, remplissez-le dans Excel, puis redéposez-le. Votre saisie est enregistrée automatiquement dans ce navigateur — vous pouvez fermer et reprendre plus tard sur le même ordinateur.</div>
   <div id="grid"></div>
   <div class="final-cta"><button class="big-validate" onclick="validateAudit()">✓ Valider &amp; exporter</button><p class="cta-sub">Ne se génère que lorsque tout est complet.</p></div>
 </div>
-<footer>Astuce : envoyez ce fichier à chaque entité. « Sauvegarder .json » permet de reprendre une saisie.</footer>
+<footer>Astuce : envoyez ce lien à chaque entité. La saisie en cours est conservée automatiquement dans le navigateur.</footer>
 
 <script>
-var CSV_TEMPLATES = {
-  existant: {n:"Liste_existant.csv", c:"Societe;Collaborateur;Poste;Type;Marque Modele;Num serie;Date achat ou debut LLD;Fin contrat garantie;Renouvellement prevu;Commentaire\n;;;;;;;;;\n"},
-  telephonie: {n:"Liste_telephonie.csv", c:"Societe;Collaborateur;Type ligne;Numero;Operateur;Forfait;Materiel;Date fin engagement;Commentaire\n;;;;;;;;\n"},
-  reseaux: {n:"Liste_reseaux.csv", c:"Societe;Site Adresse;Operateur internet;Technologie;Debit descendant;Debit montant;Materiel reseau;Date fin contrat;Commentaire\n;;;;;;;;\n"},
-  logiciel: {n:"Liste_logiciels.csv", c:"Societe;Logiciel Editeur;Version;Plan licence;Nb utilisateurs;Cout annuel HT;Date renouvellement;Mode cloud local;Commentaire\n;;;;;;;;\n"},
-  impression: {n:"Liste_impression.csv", c:"Societe;Site;Marque Modele;Type;Num serie;Contrat;Cout page NB;Cout page couleur;Fin contrat;Commentaire\n;;;;;;;;\n"}
+var XLSX_TEMPLATES = {
+  existant: {n:"Liste_existant.xlsx", h:["Societe","Collaborateur","Poste","Type","Marque / Modele","Num serie / Asset tag","Date achat ou debut LLD","Fin contrat / garantie","Renouvellement prevu","Commentaire"]},
+  telephonie: {n:"Liste_telephonie.xlsx", h:["Societe","Collaborateur","Type ligne (mobile/fixe)","Numero","Operateur","Forfait","Materiel (marque/modele)","Date fin engagement","Commentaire"]},
+  reseaux: {n:"Liste_reseaux.xlsx", h:["Societe","Site / Adresse","Operateur internet","Technologie (fibre/ADSL/4G)","Debit descendant","Debit montant","Materiel reseau","Date fin contrat","Commentaire"]},
+  logiciel: {n:"Liste_logiciels.xlsx", h:["Societe","Logiciel / Editeur","Version","Plan / licence","Nb utilisateurs","Cout annuel HT","Date renouvellement","Mode (cloud/local)","Commentaire"]},
+  impression: {n:"Liste_impression.xlsx", h:["Societe","Site","Marque / Modele","Type (copieur/imprimante)","Num serie","Contrat (achat/LLD/maintenance)","Cout page NB","Cout page couleur","Fin contrat","Commentaire"]}
 };
 
 function dlText(text, filename, mime) {
@@ -198,9 +196,14 @@ function dlText(text, filename, mime) {
 }
 
 function dlTemplate(key) {
-  var t = CSV_TEMPLATES[key];
+  var t = XLSX_TEMPLATES[key];
   if (!t) return;
-  dlText("\uFEFF" + t.c, t.n, "text/csv");
+  if (typeof XLSX === "undefined") { alert("Le module Excel n'a pas pu se charger. Verifiez votre connexion internet."); return; }
+  var ws = XLSX.utils.aoa_to_sheet([t.h, t.h.map(function(){return "";})]);
+  ws["!cols"] = t.h.map(function(){return {wch:22};});
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Modele");
+  XLSX.writeFile(wb, t.n);
 }
 
 var SAT = [{key:"niveau",label:"Niveau (1-5)",kind:"select",opts:["5 - Très satisfait","4","3","2","1 - Insatisfait"]},{key:"points",label:"Points à améliorer",kind:"text",optional:true}];
@@ -211,14 +214,14 @@ var FAMILIES = [
 {n:"1",title:"Parc informatique (matériel)",desc:"Matériel informatique en service, fournisseurs, contrats et coûts.",items:[
   {id:"1.1",t:"Fournisseur(s) de matériel + type de prestation",def:"Indiquez le ou les fournisseurs de matériel informatique.",fields:[{key:"fournisseurs",kind:"repeat",label:"Fournisseur(s)",addLabel:"Ajouter un fournisseur",sub:[{key:"societe",label:"Fournisseur",kind:"text"},{key:"contact",label:"Contact",kind:"text"},{key:"tel",label:"Tél",kind:"tel"},{key:"email",label:"Email",kind:"email"}]},{key:"prestation",kind:"multi",label:"Type de prestation",opts:["Achat","LLD","Entretien","Autres"],other:true}]},
   {id:"1.2",t:"Contrat de location / Facture d'achat",def:"Déposez le contrat de location/LLD ou la facture d'achat.",needFile:true},
-  {id:"1.3",t:"Liste de l'existant et des besoins",def:"Inventaire du matériel en service. Téléchargez le modèle CSV, complétez-le, puis redéposez-le.",template:"existant",needFile:true},
+  {id:"1.3",t:"Liste de l'existant et des besoins",def:"Inventaire du matériel en service. Téléchargez le modèle Excel, complétez-le, puis redéposez-le.",template:"existant",needFile:true},
   {id:"1.4",t:"Coût 2025 — grand livre",def:"Export comptable matériel informatique.",needFile:true},
   {id:"1.5",t:"3 dernières factures (si location)",def:"Uniquement si le matériel est en location / LLD.",needFile:true},
   {id:"1.6",t:"Niveau de satisfaction",def:"Qualité du matériel, délais, SAV.",fields:SAT}
 ]},
 {n:"2",title:"Téléphonie fixe et mobile",desc:"Lignes fixes et mobiles, matériel, opérateurs et contrats.",items:[
   {id:"2.1",t:"Opérateur(s) + contact(s)",def:"Quel(s) opérateur(s) utilisez-vous ?",fields:[{key:"operateurs",kind:"multi",label:"Opérateur(s)",opts:["Orange","SFR","Free","Bouygues Télécom","Autres"],other:true},{key:"contacts",kind:"repeat",label:"Contact(s)",addLabel:"Ajouter un contact",sub:[{key:"contact",label:"Contact",kind:"text"},{key:"tel",label:"Tél",kind:"tel"},{key:"email",label:"Email",kind:"email"}]}]},
-  {id:"2.2",t:"Liste des lignes et matériel",def:"Détail de chaque ligne. Téléchargez le modèle CSV.",template:"telephonie",needFile:true},
+  {id:"2.2",t:"Liste des lignes et matériel",def:"Détail de chaque ligne. Téléchargez le modèle Excel.",template:"telephonie",needFile:true},
   {id:"2.3",t:"Contrat(s) en cours",def:"Déposez le ou les contrats opérateur.",needFile:true},
   {id:"2.4",t:"3 dernières factures",def:"Déposez les trois factures les plus récentes.",needFile:true},
   {id:"2.5",t:"Coût annuel — export comptable",def:GLDEF("téléphonie"),needFile:true},
@@ -226,13 +229,13 @@ var FAMILIES = [
 ]},
 {n:"3",title:"Connectivité et réseau",desc:"Accès internet et réseau par site.",items:[
   {id:"3.1",t:"Gestionnaire / prestataire réseau",def:"Qui s'occupe de votre connexion et réseau ?",fields:SUP("Prestataire")},
-  {id:"3.2",t:"Accès internet et matériel par site",def:"Téléchargez le modèle CSV, complétez, redéposez.",template:"reseaux",needFile:true},
+  {id:"3.2",t:"Accès internet et matériel par site",def:"Téléchargez le modèle Excel, complétez, redéposez.",template:"reseaux",needFile:true},
   {id:"3.3",t:"Contrat ou 3 dernières factures",def:"Déposez le contrat ou à défaut les 3 dernières factures.",needFile:true},
   {id:"3.4",t:"Coût annuel — export comptable",def:GLDEF("internet et réseau"),needFile:true},
   {id:"3.5",t:"Niveau de satisfaction",def:"Stabilité, débit, support.",fields:SAT}
 ]},
 {n:"4",title:"Logiciels et licences",desc:"Logiciels utilisés, licences, coûts et outils d'IA.",items:[
-  {id:"4.1",t:"Liste des logiciels et licences",def:"Téléchargez le modèle CSV, complétez, redéposez.",template:"logiciel",needFile:true},
+  {id:"4.1",t:"Liste des logiciels et licences",def:"Téléchargez le modèle Excel, complétez, redéposez.",template:"logiciel",needFile:true},
   {id:"4.2",t:"Besoins / manques logiciels",def:"Évolutions souhaitées sur vos logiciels.",fields:[{key:"besoins",kind:"repeat",label:"Besoin(s)",addLabel:"Ajouter un besoin",sub:[{key:"besoin",label:"Besoin / remarque",kind:"text"},{key:"logiciel",label:"Logiciel concerné",kind:"text",optional:true},{key:"prio",label:"Priorité",kind:"select",opts:["Haute","Moyenne","Basse"],optional:true}]}]},
   {id:"4.3",t:"Utilisation d'outils d'IA",def:"Des collaborateurs utilisent-ils des outils d'IA ?",fields:[{key:"ia",kind:"matrix",label:"Outils d'IA",rows:["ChatGPT","Claude","Gemini","Perplexity","Autre"],cols:[{key:"abo",label:"Abonnement ?",kind:"select",opts:["Oui","Non"]},{key:"lic",label:"Nb licences",kind:"number"}]}]},
   {id:"4.4",t:"Contrat / plan d'abonnement",def:"Déposez les contrats éditeurs.",fields:[{key:"abo_ligne",label:"Abonnement en ligne ?",kind:"select",opts:["Oui","Non"]},{key:"commentaire",label:"Commentaire",kind:"text",optional:true}],needFile:true},
@@ -242,7 +245,7 @@ var FAMILIES = [
 ]},
 {n:"5",title:"Impression et photocopieur",desc:"Copieurs, imprimantes, contrats, volumes et coûts.",items:[
   {id:"5.1",t:"Fournisseur + contact(s)",def:"Fournisseur de copieurs / imprimantes.",fields:SUP("Fournisseur")},
-  {id:"5.2",t:"Parc copieurs / imprimantes",def:"Téléchargez le modèle CSV.",template:"impression",needFile:true},
+  {id:"5.2",t:"Parc copieurs / imprimantes",def:"Téléchargez le modèle Excel.",template:"impression",needFile:true},
   {id:"5.3",t:"Contrat (conditions, résiliation)",def:"Déposez le contrat copieurs.",needFile:true},
   {id:"5.4",t:"3 dernières factures",def:"Factures les plus récentes.",needFile:true},
   {id:"5.5",t:"Dernière facture de maintenance",def:"Facture maintenance / coût par page.",needFile:true},
@@ -303,9 +306,11 @@ function bindIdent(){
 }
 
 function render(){
+  var collapsed={};
+  document.querySelectorAll(".family").forEach(function(sec){var num=sec.querySelector(".fam-num").textContent;collapsed[num]=sec.classList.contains("collapsed");});
   var g=document.getElementById("grid");g.innerHTML="";
   FAMILIES.forEach(function(fam){
-    var sec=document.createElement("section");sec.className="family";
+    var sec=document.createElement("section");sec.className="family"+(collapsed[fam.n]?" collapsed":"");
     var desc=fam.desc?'<div class="fam-desc">'+fam.desc+'</div>':"";
     var bb='<button class="bulkna-btn" onclick="event.stopPropagation();toggleBulk(\''+fam.n+'\')">Non concerné</button>';
     var bp=bulkHTML(fam.n);
@@ -423,8 +428,8 @@ function bRepeat(it,f){
 
 function bFile(it){
   var c=document.createElement("div");c.className="full";
-  if(it.template&&CSV_TEMPLATES[it.template]){
-    var b=document.createElement("button");b.type="button";b.className="dl-tmpl";b.textContent="\u2913 Télécharger le modèle CSV à remplir";
+  if(it.template&&XLSX_TEMPLATES[it.template]){
+    var b=document.createElement("button");b.type="button";b.className="dl-tmpl";b.textContent="\u2913 Télécharger le modèle Excel à remplir";
     b.onclick=function(){dlTemplate(it.template);};c.appendChild(b);
   }
   var dz=document.createElement("div");dz.className="dropzone";dz.id="dz-"+it.id;
@@ -512,7 +517,6 @@ function buildReport(){
 function previewReport(){var w=window.open("","_blank");if(!w){alert("Autorisez les pop-ups pour afficher la synthèse.");return;}w.document.write(buildReport());w.document.close();}
 
 function exportCSV(){
-  var soc=Array.isArray(state._id.soc)?state._id.soc.join(", "):"";
   var rows=[["N","Question","Statut","Réponses","Fichiers","Justification"]];
   FAMILIES.forEach(function(fam){rows.push([fam.n,fam.title,"","","",""]);fam.items.forEach(function(it){var s=S(it.id);var stl=(STATUSES.find(function(x){return x.v===s.status;})||{}).label||"";var rep="",fic="",jus="";
     if(s.status==="transmis"){if(it.fields)rep=it.fields.map(function(f){var v=fToText(it,f);return v?f.label+": "+v:"";}).filter(Boolean).join(" | ");if(it.needFile||it.template)fic=(files[it.id]||[]).map(function(f){return f.name;}).join(", ");}else if(s.status==="na")jus=s.comment||"";
@@ -521,8 +525,6 @@ function exportCSV(){
   dlText("\uFEFF"+csv,"recapitulatif-audit-IT.csv","text/csv");
 }
 
-function saveJSON(){dlText(JSON.stringify(state,null,2),"audit-IT-saisie.json","application/json");}
-function importJSON(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{state=JSON.parse(r.result)||{};if(!state._id)state._id={nom:"",soc:[]};save();bindIdent();render();}catch(err){alert("Fichier illisible : "+err.message);}};r.readAsText(f);e.target.value="";}
 function resetAll(){if(confirm("Réinitialiser toute la saisie ? Action irréversible.")){state={_id:{nom:"",soc:[]}};for(var k in files)delete files[k];save();document.getElementById("banner").className="";bindIdent();render();}}
 function toggleFam(h){h.parentElement.classList.toggle("collapsed");}
 function expandAll(o){document.querySelectorAll(".family").forEach(function(f){f.classList.toggle("collapsed",!o);});}
