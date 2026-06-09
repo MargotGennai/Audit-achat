@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Formulaire d'audit achat — Catégorie IT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root{
     --paper:#F6F7F9;--card:#FFFFFF;--ink:#16222E;--ink-soft:#5A6B7B;
@@ -178,11 +177,11 @@
 
 <script>
 var XLSX_TEMPLATES = {
-  existant: {n:"Liste_existant.xlsx", h:["Societe","Collaborateur","Poste","Type","Marque / Modele","Num serie / Asset tag","Date achat ou debut LLD","Fin contrat / garantie","Renouvellement prevu","Commentaire"]},
-  telephonie: {n:"Liste_telephonie.xlsx", h:["Societe","Collaborateur","Type ligne (mobile/fixe)","Numero","Operateur","Forfait","Materiel (marque/modele)","Date fin engagement","Commentaire"]},
-  reseaux: {n:"Liste_reseaux.xlsx", h:["Societe","Site / Adresse","Operateur internet","Technologie (fibre/ADSL/4G)","Debit descendant","Debit montant","Materiel reseau","Date fin contrat","Commentaire"]},
-  logiciel: {n:"Liste_logiciels.xlsx", h:["Societe","Logiciel / Editeur","Version","Plan / licence","Nb utilisateurs","Cout annuel HT","Date renouvellement","Mode (cloud/local)","Commentaire"]},
-  impression: {n:"Liste_impression.xlsx", h:["Societe","Site","Marque / Modele","Type (copieur/imprimante)","Num serie","Contrat (achat/LLD/maintenance)","Cout page NB","Cout page couleur","Fin contrat","Commentaire"]}
+  existant: {n:"1-3-existant.xlsx"},
+  telephonie: {n:"2-2-telephonie.xlsx"},
+  reseaux: {n:"3-2-reseaux.xlsx"},
+  logiciel: {n:"4-1-logiciels.xlsx"},
+  impression: {n:"5-2-impression.xlsx"}
 };
 
 function dlText(text, filename, mime) {
@@ -198,12 +197,13 @@ function dlText(text, filename, mime) {
 function dlTemplate(key) {
   var t = XLSX_TEMPLATES[key];
   if (!t) return;
-  if (typeof XLSX === "undefined") { alert("Le module Excel n'a pas pu se charger. Verifiez votre connexion internet."); return; }
-  var ws = XLSX.utils.aoa_to_sheet([t.h, t.h.map(function(){return "";})]);
-  ws["!cols"] = t.h.map(function(){return {wch:22};});
-  var wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Modele");
-  XLSX.writeFile(wb, t.n);
+  var a = document.createElement("a");
+  a.href = t.n;
+  a.download = t.n;
+  a.style.display = "none";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 var SAT = [{key:"niveau",label:"Niveau (1-5)",kind:"select",opts:["5 - Très satisfait","4","3","2","1 - Insatisfait"]},{key:"points",label:"Points à améliorer",kind:"text",optional:true}];
