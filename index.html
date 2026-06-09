@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formulaire d'audit achat — Catégorie IT</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F7F9;--card:#FFFFFF;--ink:#16222E;--ink-soft:#5A6B7B;
+    --line:#E2E7EC;--line-strong:#CBD4DD;
+    --blueprint:#15436B;--blueprint-bright:#1E6FB8;--accent-wash:#EAF2FA;
+    --ok:#1E7A4D;--ok-bg:#E6F4EC;--ok-line:#BCE0CB;
+    --na:#6A7686;--na-bg:#EEF1F4;--na-line:#D6DCE3;
+    --warn:#A66A00;--warn-bg:#FBF1DE;--warn-line:#EBD4A6;
+    --err:#B23A3A;--err-bg:#FBE9E9;--err-line:#EFC4C4;
+    --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--paper);color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased;padding-bottom:90px}
+  header{background:var(--blueprint);color:#fff;padding:26px 32px 22px;border-bottom:3px solid var(--blueprint-bright)}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#9CC2E2;margin-bottom:8px}
+  header h1{font-size:26px;font-weight:700;letter-spacing:-.01em;line-height:1.12}
+  header h1 span{color:#7FB4E0;font-weight:500}
+  .subtitle{margin-top:8px;color:#C5D6E6;font-size:13.5px;max-width:840px}
+  .toolbar{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--line-strong);padding:11px 32px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .progress-wrap{display:flex;align-items:center;gap:10px;flex:1;min-width:220px}
+  .progress-track{flex:1;height:8px;background:var(--line);border-radius:99px;overflow:hidden;min-width:110px}
+  .progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--blueprint-bright),var(--ok));transition:width .4s ease}
+  .progress-label{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--blueprint);white-space:nowrap}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto;align-items:center}
+  button.act{font-family:var(--sans);font-size:12.5px;font-weight:600;border:1px solid var(--line-strong);background:#fff;color:var(--ink);padding:8px 13px;border-radius:7px;cursor:pointer;transition:.15s}
+  button.act:hover{border-color:var(--blueprint-bright);color:var(--blueprint-bright);background:var(--accent-wash)}
+  button.act.primary{background:var(--blueprint);border-color:var(--blueprint);color:#fff}
+  button.act.primary:hover{background:var(--blueprint-bright);border-color:var(--blueprint-bright);color:#fff}
+  button.act.ghost:hover{border-color:var(--err);color:var(--err);background:var(--err-bg)}
+  .saved-tag{font-family:var(--mono);font-size:11px;color:var(--ok);opacity:0;transition:opacity .3s}
+  .saved-tag.show{opacity:1}
+  .wrap{max-width:1120px;margin:24px auto;padding:0 32px}
+  .note{background:var(--accent-wash);border:1px solid #C5DBEF;border-left:3px solid var(--blueprint-bright);border-radius:8px;padding:13px 16px;font-size:13px;color:#2C4A63;margin-bottom:14px}
+  .note b{color:var(--blueprint)}
+  .note.amber{background:var(--warn-bg);border-color:var(--warn-line);border-left-color:var(--warn);color:#7a5200}
+  #banner{display:none;border-radius:9px;padding:14px 18px;margin-bottom:18px;font-size:13.5px;font-weight:500}
+  #banner.ok{display:block;background:var(--ok-bg);border:1px solid var(--ok-line);color:var(--ok)}
+  #banner.err{display:block;background:var(--err-bg);border:1px solid var(--err-line);color:var(--err)}
+  #banner ul{margin:8px 0 0 18px;font-weight:400}
+  .ident{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:16px 18px;margin-bottom:14px;box-shadow:0 1px 2px rgba(22,34,46,.04)}
+  .ident h2{font-size:15px;font-weight:700;display:flex;align-items:center;gap:10px;margin-bottom:4px}
+  .ident .tag{font-family:var(--mono);font-size:11px;font-weight:600;color:#fff;background:var(--blueprint);padding:3px 9px;border-radius:6px}
+  .ident p{font-size:12.5px;color:var(--ink-soft);margin-bottom:12px}
+  .family{background:var(--card);border:1px solid var(--line);border-radius:11px;margin-bottom:14px;overflow:hidden;box-shadow:0 1px 2px rgba(22,34,46,.04)}
+  .family-head{display:flex;align-items:center;gap:14px;padding:15px 18px;cursor:pointer;user-select:none}
+  .family-head:hover{background:#FAFBFC}
+  .fam-num{font-family:var(--mono);font-size:15px;font-weight:600;color:#fff;background:var(--blueprint);width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .fam-title{font-size:16px;font-weight:600;flex:1;letter-spacing:-.01em}
+  .fam-meter{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--ink-soft);background:var(--paper);padding:4px 10px;border-radius:99px;white-space:nowrap}
+  .chev{transition:transform .25s;color:var(--ink-soft);flex:0 0 auto}
+  .family.collapsed .chev{transform:rotate(-90deg)}
+  .family.collapsed .fam-body{display:none}
+  .fam-body{padding:6px 18px 16px}
+  .fam-desc{font-size:12.5px;color:#3a4b5a;background:var(--accent-wash);border:1px solid #D3E4F2;border-radius:8px;padding:11px 13px;margin:8px 0 4px;line-height:1.55}
+  .item{border-top:1px solid var(--line);padding:16px 0}
+  .item:first-of-type{border-top:none}
+  .item.invalid{background:linear-gradient(90deg,var(--err-bg),transparent 60%);margin:0 -12px;padding-left:12px;padding-right:12px;border-radius:8px}
+  .item-top{display:flex;gap:14px;align-items:flex-start}
+  .idx{font-family:var(--mono);font-size:12.5px;font-weight:600;color:var(--blueprint-bright);padding-top:3px;flex:0 0 auto;width:34px}
+  .item-main{flex:1;min-width:0}
+  .item-title{font-size:14px;font-weight:600;line-height:1.35}
+  .item-def{color:var(--ink-soft);font-size:12.5px;margin-top:3px}
+  .status-wrap{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+  select.status{font-family:var(--sans);font-size:12.5px;font-weight:600;padding:7px 28px 7px 11px;border-radius:7px;cursor:pointer;border:1px solid var(--line-strong);background:#fff;color:var(--ink);appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235A6B7B' stroke-width='3'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;min-width:160px}
+  select.status:focus{outline:2px solid var(--blueprint-bright);outline-offset:1px}
+  select.status[data-v="transmis"]{background-color:var(--ok-bg);border-color:var(--ok-line);color:var(--ok)}
+  select.status[data-v="na"]{background-color:var(--na-bg);border-color:var(--na-line);color:var(--na)}
+  select.status.needfill{border-color:var(--err-line);box-shadow:0 0 0 2px var(--err-bg)}
+  .badge{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.04em;padding:3px 8px;border-radius:5px;white-space:nowrap}
+  .badge.empty{color:var(--ink-soft);background:var(--paper);border:1px solid var(--line)}
+  .badge.todo{color:var(--warn);background:var(--warn-bg);border:1px solid var(--warn-line)}
+  .badge.done{color:var(--ok);background:var(--ok-bg);border:1px solid var(--ok-line)}
+  .answer{margin-top:13px;padding-left:48px}
+  .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:11px}
+  .full{grid-column:1/-1}
+  .field label,.fblk>label{display:block;font-size:11px;font-weight:600;color:var(--ink-soft);margin-bottom:5px}
+  .field label .req,.fblk>label .req{color:var(--err)}
+  .field input,.field select{width:100%;font-family:var(--sans);font-size:13px;color:var(--ink);border:1px solid var(--line-strong);border-radius:7px;padding:8px 10px;background:#fff}
+  .field input:focus,.field select:focus{outline:2px solid var(--blueprint-bright);outline-offset:1px;border-color:var(--blueprint-bright)}
+  .field.miss input,.field.miss select{border-color:var(--err);background:var(--err-bg)}
+  .multi{display:flex;flex-wrap:wrap;gap:8px}
+  .multi .opt{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-strong);border-radius:8px;padding:7px 11px;font-size:12.5px;cursor:pointer;background:#fff;user-select:none}
+  .multi .opt:hover{border-color:var(--blueprint-bright)}
+  .multi .opt.on{background:var(--ok-bg);border-color:var(--ok-line);color:var(--ok);font-weight:600}
+  .multi .opt input{accent-color:var(--blueprint-bright)}
+  .autre-input{margin-top:9px}
+  .autre-input input{width:100%;font-size:13px;border:1px solid var(--line-strong);border-radius:7px;padding:8px 10px}
+  .fblk.miss{outline:1px dashed var(--err);outline-offset:5px;border-radius:6px}
+  .repeat-row{border:1px solid var(--line);border-radius:9px;padding:11px 12px 12px;margin-bottom:9px;position:relative;background:#FBFCFD}
+  .repeat-row .rm{position:absolute;top:8px;right:8px;border:none;background:none;color:var(--ink-soft);cursor:pointer;font-size:16px;line-height:1}
+  .repeat-row .rm:hover{color:var(--err)}
+  .repeat-add{font-family:var(--sans);font-size:12.5px;font-weight:600;border:1px dashed var(--blueprint-bright);background:var(--accent-wash);color:var(--blueprint-bright);padding:8px 13px;border-radius:8px;cursor:pointer}
+  .repeat-add:hover{background:#dceaf6}
+  .dl-tmpl{display:inline-flex;align-items:center;gap:7px;font-family:var(--sans);font-size:12.5px;font-weight:600;border:1px solid var(--blueprint);background:var(--blueprint);color:#fff;padding:8px 13px;border-radius:8px;cursor:pointer;margin-bottom:10px;text-decoration:none}
+  .dl-tmpl:hover{background:var(--blueprint-bright);border-color:var(--blueprint-bright)}
+  .dropzone{border:1.5px dashed var(--line-strong);border-radius:9px;padding:16px;text-align:center;cursor:pointer;transition:.15s;background:#FBFCFD}
+  .dropzone:hover,.dropzone.drag{border-color:var(--blueprint-bright);background:var(--accent-wash)}
+  .dropzone.miss{border-color:var(--err);background:var(--err-bg)}
+  .dropzone .dz-main{font-size:13px;font-weight:600;color:var(--blueprint)}
+  .dropzone .dz-sub{font-size:11.5px;color:var(--ink-soft);margin-top:3px}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+  .chip{display:inline-flex;align-items:center;gap:7px;background:var(--ok-bg);border:1px solid var(--ok-line);color:var(--ok);font-size:12px;font-weight:500;padding:5px 9px;border-radius:7px}
+  .chip span{font-family:var(--mono);font-size:10px;opacity:.7}
+  .chip button{border:none;background:none;color:var(--ok);cursor:pointer;font-size:14px;line-height:1;padding:0}
+  .chip button:hover{color:var(--err)}
+  .comment-wrap label{display:block;font-size:11px;font-weight:600;color:var(--ink-soft);margin-bottom:4px}
+  .comment-wrap textarea{width:100%;font-family:var(--sans);font-size:13px;color:var(--ink);border:1px solid var(--line-strong);border-radius:7px;padding:8px 10px;resize:vertical;min-height:44px;line-height:1.4}
+  .comment-wrap textarea:focus{outline:2px solid var(--blueprint-bright);outline-offset:1px;border-color:var(--blueprint-bright)}
+  .comment-wrap textarea.miss{border-color:var(--err);background:var(--err-bg)}
+  .wordcount{font-family:var(--mono);font-size:11px;margin-top:4px;color:var(--ink-soft)}
+  .wordcount.ok{color:var(--ok)}.wordcount.bad{color:var(--err)}
+  .matrix{margin-top:4px}
+  .matrix-row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .matrix-row:last-child{border-bottom:none}
+  .matrix-name{font-weight:600;font-size:13px;min-width:110px;flex:0 0 auto;padding-bottom:8px}
+  .matrix-cell{display:flex;flex-direction:column;gap:4px}
+  .matrix-cell label{font-size:10.5px;font-weight:600;color:var(--ink-soft)}
+  .matrix-cell select,.matrix-cell input{font-family:var(--sans);font-size:13px;border:1px solid var(--line-strong);border-radius:7px;padding:7px 9px;background:#fff;min-width:120px}
+  .bulkna-btn{font-family:var(--sans);font-size:12.5px;font-weight:700;border:1px solid var(--na);background:var(--na);color:#fff;padding:8px 15px;border-radius:8px;cursor:pointer;white-space:nowrap}
+  .bulkna-btn:hover{background:#55616F;border-color:#55616F}
+  .bulkna{background:var(--na-bg);border:1px solid var(--na-line);border-radius:9px;padding:13px;margin:8px 0 4px}
+  .bulkna>label{display:block;font-size:12px;font-weight:600;margin-bottom:6px}
+  .bulkna textarea{width:100%;font-family:var(--sans);font-size:13px;border:1px solid var(--line-strong);border-radius:7px;padding:8px 10px;min-height:54px;resize:vertical}
+  .id-radios{display:flex;flex-wrap:wrap;gap:8px}
+  .id-radios .opt{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-strong);border-radius:8px;padding:7px 11px;font-size:12.5px;cursor:pointer;background:#fff;user-select:none}
+  .id-radios .opt:hover{border-color:var(--blueprint-bright)}
+  .id-radios .opt.on{background:var(--accent-wash);border-color:var(--blueprint-bright);color:var(--blueprint);font-weight:600}
+  .id-radios.miss{outline:1px dashed var(--err);outline-offset:5px;border-radius:6px}
+  .final-cta{text-align:center;margin:34px 0 6px}
+  .big-validate{font-family:var(--sans);font-size:21px;font-weight:700;color:#fff;background:var(--blueprint);border:none;border-radius:13px;padding:22px 40px;cursor:pointer;box-shadow:0 8px 22px rgba(21,67,107,.30);transition:.15s;width:100%;max-width:580px}
+  .big-validate:hover{background:var(--blueprint-bright);transform:translateY(-1px)}
+  .cta-sub{font-size:12.5px;color:var(--ink-soft);margin-top:11px}
+  footer{max-width:1120px;margin:30px auto 0;padding:0 32px;color:var(--ink-soft);font-size:12px;line-height:1.6}
+  @media(max-width:720px){header,.toolbar,.wrap{padding-left:16px;padding-right:16px}.item-top{flex-wrap:wrap}.status-wrap{align-items:flex-start;width:100%}.answer{padding-left:0}.idx{width:auto}.actions{width:100%;margin-left:0}}
+  @media print{.toolbar,.actions,.dropzone,.dl-tmpl{display:none}.family.collapsed .fam-body{display:block}.family.collapsed .chev{transform:none}body{background:#fff;padding-bottom:0}}
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">Formulaire d'audit achat - Cantal Invest</div>
+  <h1>Catégorie IT <span>— recensement contrats, coûts &amp; besoins</span></h1>
+  <p class="subtitle">À remplir par entité. Pour chaque ligne : choisissez un statut. Si <b style="color:#A6E2C0">Transmis</b>, complétez les champs ou déposez le document. Si <b style="color:#C9D4DF">Non concerné</b>, justifiez (5 mots min.).</p>
+</header>
+<div class="toolbar">
+  <div class="progress-wrap"><div class="progress-track"><div class="progress-fill" id="bar"></div></div><span class="progress-label" id="pct">0 / 0</span></div>
+  <div class="actions">
+    <span class="saved-tag" id="saved">enregistré ✓</span>
+    <button class="act" onclick="expandAll(true)">Tout déplier</button>
+    <button class="act" onclick="expandAll(false)">Tout replier</button>
+    <button class="act" onclick="previewReport()">Aperçu synthèse</button>
+    <button class="act" onclick="exportCSV()">Récap CSV</button>
+    <button class="act" onclick="saveJSON()">Sauvegarder .json</button>
+    <button class="act" onclick="document.getElementById('imp').click()">Importer .json</button>
+    <button class="act primary" onclick="validateAudit()">Valider &amp; exporter</button>
+    <button class="act ghost" onclick="resetAll()">Réinitialiser</button>
+    <input type="file" id="imp" accept=".json" style="display:none" onchange="importJSON(event)">
+  </div>
+</div>
+<div class="wrap">
+  <div id="banner"></div>
+  <div class="ident">
+    <h2><span class="tag">0</span> Identification</h2>
+    <p>Qui remplit ce formulaire ? Obligatoire.</p>
+    <div class="fields"><div class="field"><label>Nom et prénom<span class="req"> *</span></label><input id="id-nom" type="text" placeholder="Ex. Dupont Marie"></div></div>
+    <div style="margin-top:13px"><label style="display:block;font-size:11px;font-weight:600;color:var(--ink-soft);margin-bottom:6px">Société(s) concernée(s)<span class="req"> *</span></label><div class="id-radios" id="id-soc-radios"></div></div>
+  </div>
+  <div class="note amber"><b>Modèles CSV :</b> téléchargez le modèle, remplissez-le dans Excel (séparateur ;), puis redéposez-le. Les pièces jointes ne sont gardées que le temps de la session.</div>
+  <div id="grid"></div>
+  <div class="final-cta"><button class="big-validate" onclick="validateAudit()">✓ Valider &amp; exporter</button><p class="cta-sub">Ne se génère que lorsque tout est complet.</p></div>
+</div>
+<footer>Astuce : envoyez ce fichier à chaque entité. « Sauvegarder .json » permet de reprendre une saisie.</footer>
+
+<script>
+var CSV_TEMPLATES = {
+  existant: {n:"Liste_existant.csv", c:"Societe;Collaborateur;Poste;Type;Marque Modele;Num serie;Date achat ou debut LLD;Fin contrat garantie;Renouvellement prevu;Commentaire\n;;;;;;;;;\n"},
+  telephonie: {n:"Liste_telephonie.csv", c:"Societe;Collaborateur;Type ligne;Numero;Operateur;Forfait;Materiel;Date fin engagement;Commentaire\n;;;;;;;;\n"},
+  reseaux: {n:"Liste_reseaux.csv", c:"Societe;Site Adresse;Operateur internet;Technologie;Debit descendant;Debit montant;Materiel reseau;Date fin contrat;Commentaire\n;;;;;;;;\n"},
+  logiciel: {n:"Liste_logiciels.csv", c:"Societe;Logiciel Editeur;Version;Plan licence;Nb utilisateurs;Cout annuel HT;Date renouvellement;Mode cloud local;Commentaire\n;;;;;;;;\n"},
+  impression: {n:"Liste_impression.csv", c:"Societe;Site;Marque Modele;Type;Num serie;Contrat;Cout page NB;Cout page couleur;Fin contrat;Commentaire\n;;;;;;;;\n"}
+};
+
+function dlText(text, filename, mime) {
+  var a = document.createElement("a");
+  a.href = "data:" + (mime || "text/plain") + ";charset=utf-8," + encodeURIComponent(text);
+  a.download = filename;
+  a.style.display = "none";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function dlTemplate(key) {
+  var t = CSV_TEMPLATES[key];
+  if (!t) return;
+  dlText("\uFEFF" + t.c, t.n, "text/csv");
+}
+
+var SAT = [{key:"niveau",label:"Niveau (1-5)",kind:"select",opts:["5 - Très satisfait","4","3","2","1 - Insatisfait"]},{key:"points",label:"Points à améliorer",kind:"text",optional:true}];
+function SUP(w){return [{key:"contacts",kind:"repeat",label:w+"(s)",addLabel:"Ajouter",sub:[{key:"societe",label:w,kind:"text"},{key:"contact",label:"Nom du contact",kind:"text"},{key:"tel",label:"Téléphone",kind:"tel"},{key:"email",label:"Email",kind:"email"}]}];}
+function GLDEF(c){return "Déposez l'export comptable (grand livre) correspondant au(x) fournisseur(s) de "+c+".";}
+
+var FAMILIES = [
+{n:"1",title:"Parc informatique (matériel)",desc:"Matériel informatique en service, fournisseurs, contrats et coûts.",items:[
+  {id:"1.1",t:"Fournisseur(s) de matériel + type de prestation",def:"Indiquez le ou les fournisseurs de matériel informatique.",fields:[{key:"fournisseurs",kind:"repeat",label:"Fournisseur(s)",addLabel:"Ajouter un fournisseur",sub:[{key:"societe",label:"Fournisseur",kind:"text"},{key:"contact",label:"Contact",kind:"text"},{key:"tel",label:"Tél",kind:"tel"},{key:"email",label:"Email",kind:"email"}]},{key:"prestation",kind:"multi",label:"Type de prestation",opts:["Achat","LLD","Entretien","Autres"],other:true}]},
+  {id:"1.2",t:"Contrat de location / Facture d'achat",def:"Déposez le contrat de location/LLD ou la facture d'achat.",needFile:true},
+  {id:"1.3",t:"Liste de l'existant et des besoins",def:"Inventaire du matériel en service. Téléchargez le modèle CSV, complétez-le, puis redéposez-le.",template:"existant",needFile:true},
+  {id:"1.4",t:"Coût 2025 — grand livre",def:"Export comptable matériel informatique.",needFile:true},
+  {id:"1.5",t:"3 dernières factures (si location)",def:"Uniquement si le matériel est en location / LLD.",needFile:true},
+  {id:"1.6",t:"Niveau de satisfaction",def:"Qualité du matériel, délais, SAV.",fields:SAT}
+]},
+{n:"2",title:"Téléphonie fixe et mobile",desc:"Lignes fixes et mobiles, matériel, opérateurs et contrats.",items:[
+  {id:"2.1",t:"Opérateur(s) + contact(s)",def:"Quel(s) opérateur(s) utilisez-vous ?",fields:[{key:"operateurs",kind:"multi",label:"Opérateur(s)",opts:["Orange","SFR","Free","Bouygues Télécom","Autres"],other:true},{key:"contacts",kind:"repeat",label:"Contact(s)",addLabel:"Ajouter un contact",sub:[{key:"contact",label:"Contact",kind:"text"},{key:"tel",label:"Tél",kind:"tel"},{key:"email",label:"Email",kind:"email"}]}]},
+  {id:"2.2",t:"Liste des lignes et matériel",def:"Détail de chaque ligne. Téléchargez le modèle CSV.",template:"telephonie",needFile:true},
+  {id:"2.3",t:"Contrat(s) en cours",def:"Déposez le ou les contrats opérateur.",needFile:true},
+  {id:"2.4",t:"3 dernières factures",def:"Déposez les trois factures les plus récentes.",needFile:true},
+  {id:"2.5",t:"Coût annuel — export comptable",def:GLDEF("téléphonie"),needFile:true},
+  {id:"2.6",t:"Niveau de satisfaction",def:"Couverture, SAV, lisibilité des factures.",fields:SAT}
+]},
+{n:"3",title:"Connectivité et réseau",desc:"Accès internet et réseau par site.",items:[
+  {id:"3.1",t:"Gestionnaire / prestataire réseau",def:"Qui s'occupe de votre connexion et réseau ?",fields:SUP("Prestataire")},
+  {id:"3.2",t:"Accès internet et matériel par site",def:"Téléchargez le modèle CSV, complétez, redéposez.",template:"reseaux",needFile:true},
+  {id:"3.3",t:"Contrat ou 3 dernières factures",def:"Déposez le contrat ou à défaut les 3 dernières factures.",needFile:true},
+  {id:"3.4",t:"Coût annuel — export comptable",def:GLDEF("internet et réseau"),needFile:true},
+  {id:"3.5",t:"Niveau de satisfaction",def:"Stabilité, débit, support.",fields:SAT}
+]},
+{n:"4",title:"Logiciels et licences",desc:"Logiciels utilisés, licences, coûts et outils d'IA.",items:[
+  {id:"4.1",t:"Liste des logiciels et licences",def:"Téléchargez le modèle CSV, complétez, redéposez.",template:"logiciel",needFile:true},
+  {id:"4.2",t:"Besoins / manques logiciels",def:"Évolutions souhaitées sur vos logiciels.",fields:[{key:"besoins",kind:"repeat",label:"Besoin(s)",addLabel:"Ajouter un besoin",sub:[{key:"besoin",label:"Besoin / remarque",kind:"text"},{key:"logiciel",label:"Logiciel concerné",kind:"text",optional:true},{key:"prio",label:"Priorité",kind:"select",opts:["Haute","Moyenne","Basse"],optional:true}]}]},
+  {id:"4.3",t:"Utilisation d'outils d'IA",def:"Des collaborateurs utilisent-ils des outils d'IA ?",fields:[{key:"ia",kind:"matrix",label:"Outils d'IA",rows:["ChatGPT","Claude","Gemini","Perplexity","Autre"],cols:[{key:"abo",label:"Abonnement ?",kind:"select",opts:["Oui","Non"]},{key:"lic",label:"Nb licences",kind:"number"}]}]},
+  {id:"4.4",t:"Contrat / plan d'abonnement",def:"Déposez les contrats éditeurs.",fields:[{key:"abo_ligne",label:"Abonnement en ligne ?",kind:"select",opts:["Oui","Non"]},{key:"commentaire",label:"Commentaire",kind:"text",optional:true}],needFile:true},
+  {id:"4.5",t:"Coût annuel — export comptable",def:GLDEF("logiciels"),needFile:true},
+  {id:"4.6",t:"Gestion des accès lors des départs",def:"Les accès sont-ils désactivés quand un salarié part ?",fields:[{key:"desact",label:"Désactivation ?",kind:"select",opts:["Oui, systématiquement","Parfois","Non","Je ne sais pas"]},{key:"dormantes",label:"Licences dormantes ?",kind:"select",opts:["Oui, probablement","Non","Je ne sais pas"]}]},
+  {id:"4.7",t:"Niveau de satisfaction",def:"Adéquation, support éditeur, facilité.",fields:SAT}
+]},
+{n:"5",title:"Impression et photocopieur",desc:"Copieurs, imprimantes, contrats, volumes et coûts.",items:[
+  {id:"5.1",t:"Fournisseur + contact(s)",def:"Fournisseur de copieurs / imprimantes.",fields:SUP("Fournisseur")},
+  {id:"5.2",t:"Parc copieurs / imprimantes",def:"Téléchargez le modèle CSV.",template:"impression",needFile:true},
+  {id:"5.3",t:"Contrat (conditions, résiliation)",def:"Déposez le contrat copieurs.",needFile:true},
+  {id:"5.4",t:"3 dernières factures",def:"Factures les plus récentes.",needFile:true},
+  {id:"5.5",t:"Dernière facture de maintenance",def:"Facture maintenance / coût par page.",needFile:true},
+  {id:"5.6",t:"Relevé des compteurs",def:"Pages imprimées sur la période.",fields:[{key:"coul",label:"Pages couleur",kind:"number"},{key:"nb",label:"Pages N&B",kind:"number"},{key:"periode",label:"Période du relevé",kind:"text"}]},
+  {id:"5.7",t:"Coût annuel — export comptable",def:GLDEF("impression"),needFile:true},
+  {id:"5.8",t:"Niveau de satisfaction",def:"Qualité, SAV, coût/page.",fields:SAT}
+]},
+{n:"6",title:"Infogérance et support",bulkNA:true,desc:"Gestion informatique confiée à un prestataire extérieur.",items:[
+  {id:"6.1",t:"Prestataire d'infogérance + contact(s)",def:"Prestataire informatique au quotidien.",fields:SUP("Prestataire")},
+  {id:"6.2",t:"Périmètre d'intervention",def:"Missions couvertes par le prestataire.",fields:[{key:"missions",kind:"multi",label:"Missions",opts:["Dépannage","Installation postes","Supervision à distance","Sauvegardes","Conseil","Autres"],other:true},{key:"delai",label:"Délai d'intervention",kind:"select",opts:["Quelques heures","Le jour même","24-48h","Variable","Je ne sais pas"]}]},
+  {id:"6.3",t:"Contrat d'infogérance",def:"Déposez le contrat.",needFile:true},
+  {id:"6.4",t:"Coût annuel — export comptable",def:GLDEF("infogérance"),needFile:true},
+  {id:"6.5",t:"Fréquence de sollicitation",def:"Estimation sur un an.",fields:[{key:"freq",kind:"select",label:"Fréquence",opts:["Rarement (< 5 fois)","Quelques fois (5-20)","Souvent (> 20)","Je ne sais pas"]}]},
+  {id:"6.6",t:"Niveau de satisfaction",def:"Réactivité, qualité, proximité.",fields:SAT}
+]},
+{n:"7",title:"Sécurité informatique",bulkNA:true,desc:"Antivirus, sauvegardes, pare-feu, hébergement et continuité.",items:[
+  {id:"7.1",t:"Protection antivirus",def:"Un antivirus est-il installé ?",fields:[{key:"present",label:"Installé ?",kind:"select",opts:["Oui","Non","Je ne sais pas"]},{key:"nom",label:"Nom du logiciel",kind:"text",optional:true},{key:"appareils",label:"Sur quels appareils ?",kind:"select",opts:["PC","Serveurs","Les deux","Je ne sais pas"],optional:true}]},
+  {id:"7.2",t:"Sauvegarde des données",def:"Sauvegardes régulières ?",fields:[{key:"present",label:"Sauvegardes ?",kind:"select",opts:["Oui","Non","Je ne sais pas"]},{key:"freq",label:"Fréquence",kind:"select",opts:["Quotidienne","Hebdomadaire","Moins souvent","Je ne sais pas"],optional:true},{key:"test",label:"Récupération testée ?",kind:"select",opts:["Oui","Non","Je ne sais pas"],optional:true}]},
+  {id:"7.3",t:"Pare-feu",def:"Un pare-feu protège-t-il votre réseau ?",fields:[{key:"present",label:"Pare-feu ?",kind:"select",opts:["Oui","Non","Je ne sais pas"]},{key:"prec",label:"Précisions",kind:"text",optional:true}]},
+  {id:"7.4",t:"Hébergement des données",def:"Serveur local, cloud, ou les deux ?",fields:[{key:"lieu",label:"Lieu",kind:"select",opts:["Serveur local","Cloud","Les deux","PC professionnel","Je ne sais pas"]},{key:"presta",label:"Hébergeur",kind:"text",optional:true}]},
+  {id:"7.5",t:"Continuité en cas d'incident",def:"Un plan de redémarrage est-il prévu ?",fields:[{key:"plan",label:"Plan prévu ?",kind:"select",opts:["Oui, écrit","En partie","Non","Je ne sais pas"]}]},
+  {id:"7.6",t:"Prestataire sécurité + contact(s)",def:"Prestataire en charge de la sécurité.",fields:SUP("Prestataire")},
+  {id:"7.7",t:"Contrat(s) sécurité / sauvegarde",def:"Déposez les contrats.",needFile:true},
+  {id:"7.8",t:"Coût annuel — export comptable",def:GLDEF("sécurité"),needFile:true},
+  {id:"7.9",t:"Niveau de satisfaction",def:"Appréciation du niveau de sécurité.",fields:SAT}
+]},
+{n:"8",title:"Stockage et archivage (GED)",bulkNA:true,desc:"Stockage, classement, partage et archivage des documents.",items:[
+  {id:"8.1",t:"État des lieux actuel",def:"Comment vos documents sont-ils stockés ?",fields:[{key:"sol",label:"Solution actuelle",kind:"select",opts:["Serveur de fichiers","SharePoint","Classeurs papier","Mixte","Autre"]},{key:"prec",label:"Précisions",kind:"text",optional:true}]},
+  {id:"8.2",t:"Prestataire + fonctionnement",def:"Si une solution GED existe déjà.",fields:[{key:"mode",label:"Mode de fonctionnement",kind:"text"},{key:"contacts",kind:"repeat",label:"Prestataire / éditeur",addLabel:"Ajouter",sub:[{key:"societe",label:"Prestataire",kind:"text"},{key:"contact",label:"Contact",kind:"text",optional:true},{key:"tel",label:"Tél",kind:"tel",optional:true},{key:"email",label:"Email",kind:"email",optional:true}]}]},
+  {id:"8.3",t:"Dernière facture et contrat",def:"Déposez facture et contrat.",needFile:true},
+  {id:"8.4",t:"Niveau de satisfaction",def:"Facilité à retrouver et partager les documents.",fields:SAT}
+]}
+];
+
+var STATUSES=[{v:"",label:"— Statut —"},{v:"transmis",label:"Transmis"},{v:"na",label:"Non concerné"}];
+var MINW=5;
+var state={_id:{nom:"",soc:[]}};
+var files={};
+
+function load(){try{var r=localStorage.getItem("audit-it-v10");if(r)state=JSON.parse(r);}catch(e){}if(!state._id)state._id={nom:"",soc:[]};}
+var stimer;
+function save(){try{localStorage.setItem("audit-it-v10",JSON.stringify(state));}catch(e){}var t=document.getElementById("saved");t.classList.add("show");clearTimeout(stimer);stimer=setTimeout(function(){t.classList.remove("show");},1100);}
+function S(id){return state[id]||(state[id]={status:"",fields:{},comment:""});}
+
+var SOCS=["APS","ADP","Laumond","Feralu","Gayrel","Energy Menuiserie","Pontacq Larregain","Open Alu","Europose","BEDP","Entsia"];
+function bindIdent(){
+  var n=document.getElementById("id-nom");n.value=state._id.nom||"";
+  n.oninput=function(){state._id.nom=n.value;n.parentElement.classList.remove("miss");save();};
+  if(!Array.isArray(state._id.soc))state._id.soc=[];
+  var sel=state._id.soc,box=document.getElementById("id-soc-radios");box.innerHTML="";
+  SOCS.forEach(function(s){
+    var on=sel.indexOf(s)>=0;
+    var l=document.createElement("label");l.className="opt"+(on?" on":"");
+    l.innerHTML='<input type="checkbox" '+(on?"checked":"")+'> '+s;
+    l.querySelector("input").onchange=function(e){var i=sel.indexOf(s);if(e.target.checked&&i<0)sel.push(s);if(!e.target.checked&&i>=0)sel.splice(i,1);l.classList.toggle("on",e.target.checked);box.classList.remove("miss");save();};
+    box.appendChild(l);
+  });
+}
+
+function render(){
+  var g=document.getElementById("grid");g.innerHTML="";
+  FAMILIES.forEach(function(fam){
+    var sec=document.createElement("section");sec.className="family";
+    var desc=fam.desc?'<div class="fam-desc">'+fam.desc+'</div>':"";
+    var bb='<button class="bulkna-btn" onclick="event.stopPropagation();toggleBulk(\''+fam.n+'\')">Non concerné</button>';
+    var bp=bulkHTML(fam.n);
+    sec.innerHTML='<div class="family-head" onclick="toggleFam(this)"><span class="fam-num">'+fam.n+'</span><span class="fam-title">'+fam.title+'</span>'+bb+'<span class="fam-meter" id="meter-'+fam.n+'"></span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div><div class="fam-body">'+bp+desc+fam.items.map(iHTML).join("")+'</div>';
+    g.appendChild(sec);
+  });
+  FAMILIES.forEach(function(f){f.items.forEach(bindI);});
+  recompute();
+}
+
+function iHTML(it){
+  var st=S(it.id).status;
+  var opts=STATUSES.map(function(o){return '<option value="'+o.v+'" '+(o.v===st?"selected":"")+'>'+o.label+'</option>';}).join("");
+  return '<div class="item" id="row-'+it.id+'"><div class="item-top"><span class="idx">'+it.id+'</span><div class="item-main"><div class="item-title">'+it.t+'</div><div class="item-def">'+it.def+'</div></div><div class="status-wrap"><select class="status" data-id="'+it.id+'" data-v="'+st+'">'+opts+'</select><span class="badge empty" id="badge-'+it.id+'">à compléter</span></div></div><div class="answer" id="answer-'+it.id+'"></div></div>';
+}
+
+function bindI(it){
+  var sel=document.querySelector('select.status[data-id="'+CSS.escape(it.id)+'"]');
+  sel.onchange=function(){S(it.id).status=sel.value;sel.dataset.v=sel.value;sel.classList.remove("needfill");save();renderA(it);recompute();};
+  renderA(it);
+}
+
+function renderA(it){
+  var box=document.getElementById("answer-"+it.id);var st=S(it.id).status;box.innerHTML="";
+  if(st==="transmis"){
+    if(it.fields&&it.fields.length){var g=document.createElement("div");g.className="fields";it.fields.forEach(function(f){g.appendChild(bField(it,f));});box.appendChild(g);}
+    if(it.needFile||it.template)box.appendChild(bFile(it));
+  } else if(st==="na"){
+    var c=S(it.id).comment||"";
+    var w=document.createElement("div");w.className="comment-wrap";
+    w.innerHTML='<label>Justification — pourquoi non concerné ?<span style="color:var(--err)"> *</span></label><textarea placeholder="5 mots minimum…">'+c.replace(/</g,"&lt;")+'</textarea><div class="wordcount"></div>';
+    var ta=w.querySelector("textarea"),wc=w.querySelector(".wordcount");
+    var upd=function(){var n=wCnt(ta.value);wc.textContent=n+" mot"+(n>1?"s":"")+" (min. "+MINW+")";wc.className="wordcount "+(n>=MINW?"ok":"bad");};
+    ta.oninput=function(){S(it.id).comment=ta.value;ta.classList.remove("miss");save();upd();recompute();};
+    box.appendChild(w);upd();
+  }
+}
+
+function bField(it,f){
+  if(f.kind==="multi")return bMulti(it,f);
+  if(f.kind==="repeat")return bRepeat(it,f);
+  if(f.kind==="matrix")return bMatrix(it,f);
+  var w=document.createElement("div");w.className="field";
+  var val=S(it.id).fields[f.key]||"";var ctrl;
+  if(f.kind==="select"){ctrl=document.createElement("select");ctrl.innerHTML='<option value="">—</option>'+f.opts.map(function(o){return "<option "+(o===val?"selected":"")+">"+o+"</option>";}).join("");}
+  else{ctrl=document.createElement("input");ctrl.type=f.kind==="number"?"number":f.kind==="email"?"email":f.kind==="tel"?"tel":"text";ctrl.value=val;}
+  var h=function(){S(it.id).fields[f.key]=ctrl.value;w.classList.remove("miss");save();recompute();};
+  ctrl.oninput=h;ctrl.onchange=h;
+  var lab=document.createElement("label");lab.innerHTML=f.label+(f.optional?"":'<span class="req"> *</span>');
+  w.appendChild(lab);w.appendChild(ctrl);return w;
+}
+
+function bMatrix(it,f){
+  var blk=document.createElement("div");blk.className="fblk full";blk.dataset.k=f.key;
+  var lab=document.createElement("label");lab.innerHTML=f.label+(f.optional?"":'<span class="req"> *</span>');blk.appendChild(lab);
+  var d=S(it.id).fields[f.key]||(S(it.id).fields[f.key]={});
+  var tbl=document.createElement("div");tbl.className="matrix";
+  f.rows.forEach(function(rn){d[rn]=d[rn]||{};
+    var row=document.createElement("div");row.className="matrix-row";
+    var nm=document.createElement("div");nm.className="matrix-name";nm.textContent=rn;row.appendChild(nm);
+    f.cols.forEach(function(col){
+      var cell=document.createElement("div");cell.className="matrix-cell";
+      var cl=document.createElement("label");cl.textContent=col.label;var ctrl;
+      if(col.kind==="select"){ctrl=document.createElement("select");ctrl.innerHTML='<option value="">—</option>'+col.opts.map(function(o){return "<option "+(d[rn][col.key]===o?"selected":"")+">"+o+"</option>";}).join("");}
+      else{ctrl=document.createElement("input");ctrl.type=col.kind==="number"?"number":"text";ctrl.value=d[rn][col.key]||"";}
+      var h=function(){d[rn][col.key]=ctrl.value;save();recompute();};
+      ctrl.oninput=h;ctrl.onchange=h;cell.appendChild(cl);cell.appendChild(ctrl);row.appendChild(cell);
+    });tbl.appendChild(row);
+  });blk.appendChild(tbl);return blk;
+}
+
+function bulkHTML(n){return '<div class="bulkna" id="bulkna-'+n+'" style="display:none"><label>Pourquoi cette section ne vous concerne pas ? (15 mots min.)</label><textarea id="bulkna-ta-'+n+'" oninput="bulkWC(\''+n+'\')" placeholder="Expliquez…"></textarea><div class="wordcount" id="bulkna-wc-'+n+'"></div><div style="margin-top:8px;display:flex;gap:8px"><button class="act primary" onclick="applyBulk(\''+n+'\')">Marquer « Non concerné »</button><button class="act" onclick="toggleBulk(\''+n+'\')">Annuler</button></div></div>';}
+function bulkWC(n){var ta=document.getElementById("bulkna-ta-"+n);var w=wCnt(ta.value);document.getElementById("bulkna-wc-"+n).textContent=w+" mot"+(w>1?"s":"")+" (min. 15)";document.getElementById("bulkna-wc-"+n).className="wordcount "+(w>=15?"ok":"bad");}
+function toggleBulk(n){var p=document.getElementById("bulkna-"+n);var o=p.style.display==="none";p.style.display=o?"block":"none";if(o){p.parentElement.parentElement.classList.remove("collapsed");bulkWC(n);document.getElementById("bulkna-ta-"+n).focus();}}
+function applyBulk(n){var ta=document.getElementById("bulkna-ta-"+n);if(wCnt(ta.value)<15){alert("15 mots minimum.");return;}var fam=FAMILIES.find(function(f){return f.n===n;});fam.items.forEach(function(it){var s=S(it.id);s.status="na";s.comment=ta.value.trim();});save();render();}
+
+function bMulti(it,f){
+  var blk=document.createElement("div");blk.className="fblk full";blk.dataset.k=f.key;
+  var arr=function(){return S(it.id).fields[f.key]||(S(it.id).fields[f.key]=[]);};
+  var lab=document.createElement("label");lab.innerHTML=f.label+(f.optional?"":'<span class="req"> *</span>');blk.appendChild(lab);
+  var row=document.createElement("div");row.className="multi";
+  var aw=document.createElement("div");aw.className="autre-input";aw.style.display="none";
+  aw.innerHTML='<input type="text" placeholder="Précisez…" value="'+(S(it.id).fields[f.key+"_autre"]||"").replace(/"/g,"&quot;")+'">';
+  aw.querySelector("input").oninput=function(){S(it.id).fields[f.key+"_autre"]=aw.querySelector("input").value;save();recompute();};
+  f.opts.forEach(function(o){
+    var on=arr().indexOf(o)>=0;var l=document.createElement("label");l.className="opt"+(on?" on":"");
+    l.innerHTML='<input type="checkbox" '+(on?"checked":"")+'> '+o;
+    l.querySelector("input").onchange=function(e){var a=arr();var i=a.indexOf(o);if(e.target.checked&&i<0)a.push(o);if(!e.target.checked&&i>=0)a.splice(i,1);l.classList.toggle("on",e.target.checked);if(f.other&&o==="Autres")aw.style.display=e.target.checked?"block":"none";save();recompute();};
+    row.appendChild(l);
+  });
+  blk.appendChild(row);if(f.other){blk.appendChild(aw);if(arr().indexOf("Autres")>=0)aw.style.display="block";}
+  return blk;
+}
+
+function bRepeat(it,f){
+  var blk=document.createElement("div");blk.className="fblk full";blk.dataset.k=f.key;
+  var lab=document.createElement("label");lab.innerHTML=f.label+(f.optional?"":'<span class="req"> *</span>');blk.appendChild(lab);
+  var rb=document.createElement("div");blk.appendChild(rb);
+  var add=document.createElement("button");add.type="button";add.className="repeat-add";add.textContent="+ "+(f.addLabel||"Ajouter");blk.appendChild(add);
+  var data=function(){return S(it.id).fields[f.key]||(S(it.id).fields[f.key]=[{}]);};
+  if(data().length===0)data().push({});
+  function paint(){rb.innerHTML="";data().forEach(function(ro,idx){
+    var r=document.createElement("div");r.className="repeat-row";var g=document.createElement("div");g.className="fields";
+    f.sub.forEach(function(sf){var w=document.createElement("div");w.className="field";var l=document.createElement("label");l.innerHTML=sf.label+(sf.optional?"":'<span class="req"> *</span>');
+      var inp;if(sf.kind==="select"){inp=document.createElement("select");inp.innerHTML='<option value="">—</option>'+sf.opts.map(function(o){return "<option "+(ro[sf.key]===o?"selected":"")+">"+o+"</option>";}).join("");}
+      else{inp=document.createElement("input");inp.type=sf.kind==="number"?"number":sf.kind==="email"?"email":sf.kind==="tel"?"tel":"text";inp.value=ro[sf.key]||"";}
+      var h=function(){ro[sf.key]=inp.value;save();recompute();};inp.oninput=h;inp.onchange=h;w.appendChild(l);w.appendChild(inp);g.appendChild(w);
+    });r.appendChild(g);
+    if(data().length>1){var rm=document.createElement("button");rm.type="button";rm.className="rm";rm.textContent="\u00d7";rm.onclick=function(){data().splice(idx,1);save();paint();recompute();};r.appendChild(rm);}
+    rb.appendChild(r);
+  });}
+  add.onclick=function(){data().push({});save();paint();recompute();};
+  paint();return blk;
+}
+
+function bFile(it){
+  var c=document.createElement("div");c.className="full";
+  if(it.template&&CSV_TEMPLATES[it.template]){
+    var b=document.createElement("button");b.type="button";b.className="dl-tmpl";b.textContent="\u2913 Télécharger le modèle CSV à remplir";
+    b.onclick=function(){dlTemplate(it.template);};c.appendChild(b);
+  }
+  var dz=document.createElement("div");dz.className="dropzone";dz.id="dz-"+it.id;
+  dz.innerHTML='<div class="dz-main">'+(it.template?"Redéposez ici le modèle complété":"Déposer un fichier ou cliquer pour choisir")+'</div><div class="dz-sub">PDF, Excel ou CSV · plusieurs fichiers possibles</div><input type="file" multiple accept=".pdf,.xls,.xlsx,.csv" style="display:none">';
+  var inp=dz.querySelector("input");
+  dz.onclick=function(){inp.click();};
+  inp.onchange=function(){addF(it.id,inp.files);inp.value="";};
+  ["dragover","dragenter"].forEach(function(e){dz.addEventListener(e,function(ev){ev.preventDefault();dz.classList.add("drag");});});
+  ["dragleave","drop"].forEach(function(e){dz.addEventListener(e,function(ev){ev.preventDefault();dz.classList.remove("drag");});});
+  dz.addEventListener("drop",function(ev){addF(it.id,ev.dataTransfer.files);});
+  c.appendChild(dz);
+  var ch=document.createElement("div");ch.className="chips";ch.id="chips-"+it.id;c.appendChild(ch);
+  setTimeout(function(){renderCh(it.id);},0);
+  return c;
+}
+function addF(id,fl){files[id]=files[id]||[];Array.from(fl).forEach(function(f){files[id].push(f);});var dz=document.getElementById("dz-"+id);if(dz)dz.classList.remove("miss");renderCh(id);recompute();}
+function renderCh(id){var box=document.getElementById("chips-"+id);if(!box)return;box.innerHTML="";(files[id]||[]).forEach(function(f,i){var c=document.createElement("div");c.className="chip";c.innerHTML=f.name+' <span>'+(f.size/1024).toFixed(0)+' Ko</span> <button title="Retirer">\u00d7</button>';c.querySelector("button").onclick=function(){files[id].splice(i,1);renderCh(id);recompute();};box.appendChild(c);});}
+function wCnt(s){return(s||"").trim().split(/\s+/).filter(Boolean).length;}
+
+function fFilled(it,f){
+  var s=S(it.id);
+  if(f.kind==="multi"){var a=s.fields[f.key]||[];if(!a.length)return false;if(f.other&&a.indexOf("Autres")>=0&&!String(s.fields[f.key+"_autre"]||"").trim())return false;return true;}
+  if(f.kind==="repeat"){var rows=s.fields[f.key]||[];return rows.some(function(r){return f.sub.every(function(sf){return sf.optional||String(r[sf.key]||"").trim();});});}
+  if(f.kind==="matrix"){if(f.optional)return true;var d=s.fields[f.key]||{};return f.rows.some(function(r){return d[r]&&String(d[r][f.cols[0].key]||"").trim();});}
+  return String(s.fields[f.key]||"").trim()!=="";
+}
+function iStat(it){
+  var s=S(it.id);if(!s.status)return"empty";
+  if(s.status==="na")return wCnt(s.comment)>=MINW?"done":"todo";
+  var ok=true;
+  if(it.fields&&it.fields.length)ok=it.fields.every(function(f){return f.optional||fFilled(it,f);});
+  if(ok&&(it.needFile||it.template))ok=!!(files[it.id]&&files[it.id].length);
+  return ok?"done":"todo";
+}
+function recompute(){
+  var done=0,total=0;
+  FAMILIES.forEach(function(fam){var fd=0;fam.items.forEach(function(it){total++;var st=iStat(it);if(st==="done"){done++;fd++;}var b=document.getElementById("badge-"+it.id);if(b){b.className="badge "+(st==="done"?"done":st==="empty"?"empty":"todo");b.textContent=st==="done"?"complété":st==="empty"?"à compléter":"incomplet";}});var m=document.getElementById("meter-"+fam.n);if(m)m.textContent=fd+"/"+fam.items.length;});
+  document.getElementById("bar").style.width=(total?done/total*100:0)+"%";
+  document.getElementById("pct").textContent=done+" / "+total;
+}
+
+function markMissing(){
+  document.querySelectorAll(".item").forEach(function(el){el.classList.remove("invalid");});
+  var p=[];
+  if(!String(state._id.nom||"").trim()){document.getElementById("id-nom").parentElement.classList.add("miss");p.push("Nom manquant");}
+  if(!state._id.soc||!state._id.soc.length){document.getElementById("id-soc-radios").classList.add("miss");p.push("Société manquante");}
+  FAMILIES.forEach(function(fam){fam.items.forEach(function(it){
+    var st=iStat(it);if(st==="done")return;
+    document.getElementById("row-"+it.id).classList.add("invalid");
+    if(!S(it.id).status){document.querySelector('select.status[data-id="'+CSS.escape(it.id)+'"]').classList.add("needfill");p.push(it.id+" — statut manquant");return;}
+    if(S(it.id).status==="na"){var ta=document.querySelector("#answer-"+CSS.escape(it.id)+" textarea");if(ta)ta.classList.add("miss");p.push(it.id+" — justification");return;}
+    if(it.fields&&it.fields.some(function(f){return!f.optional&&!fFilled(it,f);}))p.push(it.id+" — champs obligatoires");
+    if((it.needFile||it.template)&&!(files[it.id]&&files[it.id].length)){var dz=document.getElementById("dz-"+it.id);if(dz)dz.classList.add("miss");p.push(it.id+" — fichier manquant");}
+  });});
+  return p;
+}
+
+function validateAudit(){
+  var banner=document.getElementById("banner");var p=markMissing();
+  if(p.length){banner.className="err";banner.innerHTML="<b>Incomplet — "+p.length+" point(s) à corriger.</b><ul>"+p.slice(0,40).map(function(x){return"<li>"+x+"</li>";}).join("")+"</ul>";banner.scrollIntoView({behavior:"smooth"});return;}
+  banner.className="ok";banner.innerHTML="<b>Audit complet ✓</b> — Synthèse et récap. en cours…";banner.scrollIntoView({behavior:"smooth"});
+  previewReport();exportCSV();
+}
+
+function fToText(it,f){
+  var s=S(it.id);
+  if(f.kind==="multi"){var a=(s.fields[f.key]||[]).slice();var au=s.fields[f.key+"_autre"];if(f.other&&a.indexOf("Autres")>=0&&au)a[a.indexOf("Autres")]="Autres: "+au;return a.join(", ");}
+  if(f.kind==="repeat"){return(s.fields[f.key]||[]).map(function(r){return f.sub.map(function(sf){return r[sf.key];}).filter(Boolean).join(" / ");}).filter(Boolean).join(" ; ");}
+  if(f.kind==="matrix"){var d=s.fields[f.key]||{};return f.rows.map(function(r){var v=d[r]||{};var pts=f.cols.map(function(c){return v[c.key];}).filter(Boolean);return pts.length?r+" ("+pts.join(", ")+")":"";}).filter(Boolean).join(" | ");}
+  return s.fields[f.key]||"";
+}
+
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+function buildReport(){
+  var soc=Array.isArray(state._id.soc)?state._id.soc.join(", "):"";
+  var dt=new Date().toLocaleDateString("fr-FR",{day:"2-digit",month:"long",year:"numeric"});
+  var tr=0,na=0,inc=0;FAMILIES.forEach(function(f){f.items.forEach(function(it){var st=S(it.id).status;if(st==="transmis")tr++;else if(st==="na")na++;else inc++;});});
+  function pill(v){var m={transmis:["Transmis","#1E7A4D","#E6F4EC"],na:["Non concerné","#566273","#EEF1F4"]};var x=m[v]||["Non renseigné","#B23A3A","#FBE9E9"];return'<span style="font-size:11px;font-weight:700;padding:4px 11px;border-radius:99px;color:'+x[1]+';background:'+x[2]+'">'+x[0]+'</span>';}
+  function iAns(it){var s=S(it.id);if(s.status==="na")return'<div style="margin-left:42px;color:#5a6b7b;font-size:13px"><b>Justification :</b> '+esc(s.comment)+'</div>';if(s.status!=="transmis")return'<div style="margin-left:42px;color:#9aa6b2;font-size:13px;font-style:italic">Non renseigné</div>';var pts=[];if(it.fields)it.fields.forEach(function(f){var v=fToText(it,f);if(v)pts.push("<b>"+esc(f.label)+" :</b> "+esc(v));});if(it.needFile||it.template){var fn=(files[it.id]||[]).map(function(f){return f.name;});pts.push("<b>PJ :</b> "+(fn.length?esc(fn.join(", ")):"aucun"));}return'<div style="margin-left:42px;font-size:13px">'+pts.join("<br>")+'</div>';}
+  var body=FAMILIES.map(function(fam){return'<div style="max-width:920px;margin:18px auto;background:#fff;border:1px solid #e2e7ec;border-radius:12px;overflow:hidden"><h2 style="font-size:17px;padding:16px 22px;background:#f7f9fb;border-bottom:1px solid #e2e7ec;display:flex;align-items:center;gap:12px;margin:0"><span style="background:#15436b;color:#fff;width:28px;height:28px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:14px">'+fam.n+'</span>'+esc(fam.title)+'</h2>'+fam.items.map(function(it){return'<div style="padding:15px 22px;border-top:1px solid #eef1f4"><div style="display:flex;align-items:center;gap:12px;margin-bottom:8px"><span style="font-family:monospace;font-size:12px;font-weight:700;color:#1E6FB8;min-width:30px">'+it.id+'</span><span style="font-weight:600;font-size:14px;flex:1">'+esc(it.t)+'</span>'+pill(S(it.id).status)+'</div>'+iAns(it)+'</div>';}).join("")+'</div>';}).join("");
+  return'<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Synthèse audit IT</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;color:#1b2733;line-height:1.5;background:#f4f6f8;padding:0 0 60px}@media print{body{background:#fff}}</style></head><body><header style="background:#15436b;color:#fff;padding:34px 40px"><div style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#9cc2e2;margin-bottom:8px">Synthèse audit IT · Cantal Invest</div><h1 style="font-size:26px;font-weight:700;margin:0">Catégorie IT</h1><div style="margin-top:10px;font-size:14px;color:#d3e3f0">Répondant : <b style="color:#fff">'+esc(state._id.nom)+'</b> · Société(s) : <b style="color:#fff">'+esc(soc)+'</b> · '+dt+'</div></header><div style="max-width:920px;margin:22px auto;padding:0 40px;display:flex;gap:14px;flex-wrap:wrap"><div style="flex:1;min-width:150px;background:#fff;border:1px solid #e2e7ec;border-radius:10px;padding:14px 16px"><div style="font-size:26px;font-weight:700;color:#1E7A4D">'+tr+'</div><div style="font-size:12px;color:#5a6b7b">Transmis</div></div><div style="flex:1;min-width:150px;background:#fff;border:1px solid #e2e7ec;border-radius:10px;padding:14px 16px"><div style="font-size:26px;font-weight:700;color:#566273">'+na+'</div><div style="font-size:12px;color:#5a6b7b">Non concerné</div></div><div style="flex:1;min-width:150px;background:#fff;border:1px solid #e2e7ec;border-radius:10px;padding:14px 16px"><div style="font-size:26px;font-weight:700;color:#B23A3A">'+inc+'</div><div style="font-size:12px;color:#5a6b7b">Non renseigné</div></div></div>'+body+'</body></html>';
+}
+
+function previewReport(){var w=window.open("","_blank");if(!w){alert("Autorisez les pop-ups pour afficher la synthèse.");return;}w.document.write(buildReport());w.document.close();}
+
+function exportCSV(){
+  var soc=Array.isArray(state._id.soc)?state._id.soc.join(", "):"";
+  var rows=[["N","Question","Statut","Réponses","Fichiers","Justification"]];
+  FAMILIES.forEach(function(fam){rows.push([fam.n,fam.title,"","","",""]);fam.items.forEach(function(it){var s=S(it.id);var stl=(STATUSES.find(function(x){return x.v===s.status;})||{}).label||"";var rep="",fic="",jus="";
+    if(s.status==="transmis"){if(it.fields)rep=it.fields.map(function(f){var v=fToText(it,f);return v?f.label+": "+v:"";}).filter(Boolean).join(" | ");if(it.needFile||it.template)fic=(files[it.id]||[]).map(function(f){return f.name;}).join(", ");}else if(s.status==="na")jus=s.comment||"";
+    rows.push([it.id,it.t,stl,rep,fic,jus]);});});
+  var csv=rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"';}).join(";");}).join("\r\n");
+  dlText("\uFEFF"+csv,"recapitulatif-audit-IT.csv","text/csv");
+}
+
+function saveJSON(){dlText(JSON.stringify(state,null,2),"audit-IT-saisie.json","application/json");}
+function importJSON(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{state=JSON.parse(r.result)||{};if(!state._id)state._id={nom:"",soc:[]};save();bindIdent();render();}catch(err){alert("Fichier illisible : "+err.message);}};r.readAsText(f);e.target.value="";}
+function resetAll(){if(confirm("Réinitialiser toute la saisie ? Action irréversible.")){state={_id:{nom:"",soc:[]}};for(var k in files)delete files[k];save();document.getElementById("banner").className="";bindIdent();render();}}
+function toggleFam(h){h.parentElement.classList.toggle("collapsed");}
+function expandAll(o){document.querySelectorAll(".family").forEach(function(f){f.classList.toggle("collapsed",!o);});}
+
+load();bindIdent();render();
+</script>
+</body>
+</html>
